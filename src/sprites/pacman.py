@@ -1,0 +1,78 @@
+import pygame
+from utils.constants import *
+
+class Pacman(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.load_sprites()
+        self.image = self.sprites[LEFT][0]  # Default sprite
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = LEFT
+        self.next_direction = LEFT
+        self.animation_frame = 0
+        self.animation_timer = 0
+        self.speed = PACMAN_SPEED
+        
+    def load_sprites(self):
+        sprite_sheet = pygame.image.load(PACMAN_SPRITE).convert_alpha()
+        
+        # Create base frame
+        base_frame = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
+        
+        # Create animation frames (open and closed mouth)
+        self.sprites = {
+            LEFT: [
+                base_frame,
+                pygame.transform.rotate(base_frame, 30),
+                pygame.transform.rotate(base_frame, -30)
+            ],
+            RIGHT: [
+                pygame.transform.rotate(base_frame, 180),
+                pygame.transform.rotate(base_frame, 150),
+                pygame.transform.rotate(base_frame, 210)
+            ],
+            UP: [
+                pygame.transform.rotate(base_frame, 90),
+                pygame.transform.rotate(base_frame, 60),
+                pygame.transform.rotate(base_frame, 120)
+            ],
+            DOWN: [
+                pygame.transform.rotate(base_frame, 270),
+                pygame.transform.rotate(base_frame, 240),
+                pygame.transform.rotate(base_frame, 300)
+            ]
+        }
+        
+    def update(self, wall_group):
+        # Update position based on direction if we can move
+        if self.can_move(self.direction, wall_group):
+            self.rect.x += self.direction[0] * self.speed
+            self.rect.y += self.direction[1] * self.speed
+        
+        # Try to change to next_direction if we're not already moving in that direction
+        if self.next_direction != self.direction and self.can_move(self.next_direction, wall_group):
+            self.direction = self.next_direction
+        
+        # Handle animation
+        self.animation_timer += 1
+        if self.animation_timer >= 6:  # Control animation speed
+            self.animation_timer = 0
+            self.animation_frame = (self.animation_frame + 1) % 3
+            self.image = self.sprites[self.direction][self.animation_frame]
+    
+    def set_direction(self, direction):
+        self.next_direction = direction
+        
+    def can_move(self, direction, wall_group):
+        # Create a temporary rect for checking the next position
+        next_rect = self.rect.copy()
+        next_rect.x += direction[0] * self.speed
+        next_rect.y += direction[1] * self.speed
+        
+        # Check collision with walls
+        for wall in wall_group:
+            if next_rect.colliderect(wall.rect):
+                return False
+        return True
