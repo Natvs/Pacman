@@ -45,14 +45,14 @@ class Pacman(pygame.sprite.Sprite):
             ]
         }
         
-    def update(self, wall_group):
+    def update(self, walls):
         # Update position based on direction if we can move
-        if self.can_move(self.direction, wall_group):
+        if self.can_move(self.direction, walls):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
         
         # Try to change to next_direction if we're not already moving in that direction
-        if self.next_direction != self.direction and self.can_move(self.next_direction, wall_group):
+        if self.next_direction != self.direction and self.can_move(self.next_direction, walls):
             self.direction = self.next_direction
         
         # Handle animation
@@ -65,14 +65,14 @@ class Pacman(pygame.sprite.Sprite):
     def set_direction(self, direction):
         self.next_direction = direction
         
-    def can_move(self, direction, wall_group):
+    def can_move(self, direction, walls):
         # Create a temporary rect for checking the next position
         next_rect = self.rect.copy()
         next_rect.x += direction[0] * self.speed
         next_rect.y += direction[1] * self.speed
         
         # Check collision with walls
-        for wall in wall_group:
+        for wall in walls:
             if next_rect.colliderect(wall.rect):
                 return False
         return True

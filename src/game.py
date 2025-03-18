@@ -1,5 +1,6 @@
 import pygame
 from utils.constants import *
+from sprites.wall import Wall
 from sprites.pacman import Pacman
 from sprites.ghosts.blinky import Blinky
 from sprites.ghosts.pinky import Pinky
@@ -14,7 +15,7 @@ class Game:
         self.score = 0
         self.lives = 3
         
-        self.wall_group = pygame.sprite.Group()
+        self.walls = []
         
         # Initialize game map
         self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -43,23 +44,17 @@ class Game:
     def create_boundary_walls(self):
         """Create the boundary walls of the map"""
         # Create wall sprites for the boundaries
-        wall_thickness = TILE_SIZE
         
         # Top and bottom walls
         for x in range(0, GRID_WIDTH*TILE_SIZE, TILE_SIZE):
-            top_wall = pygame.sprite.Sprite()
-            top_wall.rect = pygame.Rect(x, 0, TILE_SIZE, wall_thickness)
-            bottom_wall = pygame.sprite.Sprite()
-            bottom_wall.rect = pygame.Rect(x, GRID_HEIGHT*TILE_SIZE - wall_thickness, TILE_SIZE, wall_thickness)
-            self.wall_group.add(top_wall, bottom_wall)
+            self.walls.append(Wall(x, 0))
+            self.walls.append(Wall(x, (GRID_HEIGHT - 1)*TILE_SIZE))
         
         # Left and right walls
         for y in range(0, GRID_HEIGHT*TILE_SIZE, TILE_SIZE):
-            left_wall = pygame.sprite.Sprite()
-            left_wall.rect = pygame.Rect(0, y, wall_thickness, TILE_SIZE)
-            right_wall = pygame.sprite.Sprite()
-            right_wall.rect = pygame.Rect(GRID_WIDTH*TILE_SIZE - wall_thickness, y, wall_thickness, TILE_SIZE)
-            self.wall_group.add(left_wall, right_wall)
+            self.walls.append(Wall(0, y))
+            self.walls.append(Wall((GRID_WIDTH - 1)*TILE_SIZE, y))
+        
     
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
@@ -82,13 +77,13 @@ class Game:
             return
             
         # Update Pacman
-        self.pacman.update(self.wall_group)
+        self.pacman.update(self.walls)
         
         # Update ghosts
-        self.inky.update(self.wall_group, self.pacman, self.blinky)
-        self.pinky.update(self.wall_group, self.pacman)
-        self.blinky.update(self.wall_group, self.pacman)
-        self.clyde.update(self.wall_group, self.pacman)
+        self.inky.update(self.walls, self.pacman, self.blinky)
+        self.pinky.update(self.walls, self.pacman)
+        self.blinky.update(self.walls, self.pacman)
+        self.clyde.update(self.walls, self.pacman)
         
         # Check for collisions
         self.check_collisions()
