@@ -22,14 +22,14 @@ class Game:
         self.load_map()
         
         # Create Pacman
-        self.pacman = Pacman(0.5*GRID_WIDTH * TILE_SIZE, 0.55 * GRID_HEIGHT * TILE_SIZE)
+        self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE)
         
         # Create ghosts
         self.blinky = Blinky(0.5*GRID_WIDTH * TILE_SIZE, 0.45*GRID_WIDTH * TILE_SIZE)
         self.pinky = Pinky(0.5*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
         self.inky = Inky(0.4*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
         self.clyde = Clyde(0.6*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
-        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+        self.ghosts = [] # self.blinky, self.pinky, self.inky, self.clyde
     
     def load_map(self):
         # Load and scale the map image
@@ -54,6 +54,177 @@ class Game:
         for y in range(0, GRID_HEIGHT*TILE_SIZE, TILE_SIZE):
             self.walls.append(Wall(0, y))
             self.walls.append(Wall((GRID_WIDTH - 1)*TILE_SIZE, y))
+
+        # Square 1
+        for x in range(2, 6):
+            for y in range(2, 6):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Square 2
+        for x in range(22, 26):
+            for y in range(2, 6):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Square 3
+        for x in range(1, 3):
+            for y in range(28, 30):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Square 4
+        for x in range(25, 27):
+            for y in range(28, 30):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 1
+        for x in range(7, 12):
+            for y in range(2, 6):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 2
+        for x in range(16, 21):
+            for y in range(2, 6):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 3
+        for x in range(13, 15):
+            for y in range(1, 6):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 4
+        for x in range(2, 6):
+            for y in range(7, 9):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 5
+        for x in range(22, 26):
+            for y in range(7, 9):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 6
+        for x in range(1, 6):
+            for y in range(10, 17):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 7
+        for x in range(22, 27):
+            for y in range(10, 17):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 8
+        for x in range(1, 6):
+            for y in range(18, 23):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 9
+        for x in range(22, 27):
+            for y in range(18, 23):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 10
+        for x in range(7, 9):
+            for y in range(17, 23):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 11
+        for x in range(19, 21):
+            for y in range(17, 23):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Rectangle 12
+        for x in range(7, 12):
+            for y in range(24, 27):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Rectangle 13
+        for x in range(16, 21):
+            for y in range(24, 27):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 1
+        for x in range(7, 9):
+            for y in range(7, 16):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(9, 12):
+            for y in range(10, 13):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 2
+        for x in range(19, 21):
+            for y in range(7, 16):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(16, 19):
+            for y in range(10, 13):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Shape 3
+        for x in range(10, 18):
+            for y in range(7, 9):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(13, 15):
+            for y in range(9, 13):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 4
+        for x in range(10, 18):
+            for y in range(21, 23):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(13, 15):
+            for y in range(23, 27):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 5
+        for x in range(2, 6):
+            for y in range(24, 27):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(4, 6):
+            for y in range(27, 30):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        
+        # Shape 6
+        for x in range(22, 26):
+            for y in range(24, 27):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(22, 24):
+            for y in range(27, 30):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 7
+        for x in range(2, 12):
+            for y in range(31, 34):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(7, 9):
+            for y in range(28, 31):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 8
+        for x in range(16, 26):
+            for y in range(31, 34):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(19, 21):
+            for y in range(28, 31):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Shape 9
+        for x in range(10, 18):
+            for y in range(28, 30):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for x in range(13, 15):
+            for y in range(30, 34):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+
+        # Home
+        for y in range(14, 16):
+            for x in range(11, 13):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+            for x in range(15, 17):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for y in range(18, 20):
+            for x in range(11, 17):
+                self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
+        for y in range(14, 20):
+            self.walls.append(Wall(10*TILE_SIZE, y*TILE_SIZE))
+            self.walls.append(Wall(17*TILE_SIZE, y*TILE_SIZE))
+        
         
     
     def handle_input(self, event):
@@ -118,6 +289,14 @@ class Game:
         # Draw map
         self.screen.blit(self.map_surface, (0, 0))
         
+        # Draw walls
+        tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        for wall in self.walls:
+            pygame.draw.rect(tmp, BLUE, wall.rect)
+        walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
+        self.screen.blit(walls_surface, (0, 0))
+
         # Draw all sprites
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
         tmp.blit(self.pacman.image, self.pacman.rect)
