@@ -288,6 +288,12 @@ class Game:
                         self.state = GAME_OVER
                     else:
                         self.reset_positions()
+
+        # Check dots collisions
+        for dot in self.dots:
+            if self.pacman.rect.colliderect(dot.rect):
+                self.score += 1
+                self.dots.remove(dot)
     
     def reset_positions(self):
         """Reset positions of Pacman and ghosts after losing a life"""
