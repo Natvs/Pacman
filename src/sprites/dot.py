@@ -22,5 +22,5 @@ class Dot(pygame.sprite.Sprite):
         
         # Set up the rect
         self.rect = self.image.get_rect()
-        self.rect.centerx = x + TILE_SIZE // 2
-        self.rect.centery = y + TILE_SIZE // 2
+        self.rect.centerx = x + TILE_SIZE//2
+        self.rect.centery = y + TILE_SIZE//2

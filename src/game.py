@@ -1,6 +1,7 @@
 import pygame
 from utils.constants import *
 from sprites.wall import Wall
+from sprites.dot import Dot
 from sprites.pacman import Pacman
 from sprites.ghosts.blinky import Blinky
 from sprites.ghosts.pinky import Pinky
@@ -16,6 +17,7 @@ class Game:
         self.lives = 3
         
         self.walls = []
+        self.dots = []
         
         # Initialize game map
         self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -41,10 +43,11 @@ class Game:
         # TODO: Create wall collision boxes based on the map image
         # This would involve analyzing the map image to create wall sprites
         # For now, we'll just add boundary walls
-        self.create_boundary_walls()
+        self.set_walls()
+        self.set_dots()
     
-    def create_boundary_walls(self):
-        """Create the boundary walls of the map"""
+    def set_walls(self):
+        """Create the walls of the map"""
         # Create wall sprites for the boundaries
         
         # Top and bottom walls
@@ -227,8 +230,19 @@ class Game:
             self.walls.append(Wall(10*TILE_SIZE, y*TILE_SIZE))
             self.walls.append(Wall(17*TILE_SIZE, y*TILE_SIZE))
         
-        
-    
+    def set_dots(self):
+        for x in range(0, GRID_WIDTH):
+            for y in range(0, GRID_HEIGHT):
+                if not self.is_wall(x*TILE_SIZE, y*TILE_SIZE):
+                    self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
+                    
+    def is_wall(self, x, y):
+        for wall in self.walls:
+            if (wall.rect.x == x and wall.rect.y == y):
+                return True
+        return False
+            
+
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
             if self.state == PLAYING:
@@ -298,6 +312,14 @@ class Game:
         walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
         self.screen.blit(walls_surface, (0, 0))
+
+        # Draw dots
+        tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        for dot in self.dots:
+            tmp.blit(dot.image, dot.rect)
+        dot_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), dot_surface)
+        self.screen.blit(dot_surface, (0, 0))
 
         # Draw all sprites
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
