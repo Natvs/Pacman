@@ -25,11 +25,13 @@ class Game:
         self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE)
         
         # Create ghosts
-        self.blinky = Blinky(0.5*GRID_WIDTH * TILE_SIZE, 0.45*GRID_WIDTH * TILE_SIZE)
-        self.pinky = Pinky(0.5*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
-        self.inky = Inky(0.4*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
-        self.clyde = Clyde(0.6*GRID_WIDTH * TILE_SIZE, 0.5*GRID_WIDTH * TILE_SIZE)
-        self.ghosts = [] # self.blinky, self.pinky, self.inky, self.clyde
+        self.blinky = Blinky(12* TILE_SIZE, 16.5 * TILE_SIZE)
+        self.pinky = Pinky(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
+        self.inky = Inky(15 * TILE_SIZE, 16.5 * TILE_SIZE)
+        self.clyde = Clyde(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
+        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+
+        self.reset_positions()
     
     def load_map(self):
         # Load and scale the map image
@@ -275,15 +277,15 @@ class Game:
     
     def reset_positions(self):
         """Reset positions of Pacman and ghosts after losing a life"""
-        self.pacman.rect.x = 14 * TILE_SIZE
-        self.pacman.rect.y = 23 * TILE_SIZE
+        self.pacman.rect.x = 13.5 * TILE_SIZE
+        self.pacman.rect.y = 20 * TILE_SIZE
         self.pacman.direction = LEFT
         
         # Reset ghost positions
-        self.blinky.rect.x, self.blinky.rect.y = 14 * TILE_SIZE, 11 * TILE_SIZE
-        self.pinky.rect.x, self.pinky.rect.y = 14 * TILE_SIZE, 14 * TILE_SIZE
-        self.inky.rect.x, self.inky.rect.y = 12 * TILE_SIZE, 14 * TILE_SIZE
-        self.clyde.rect.x, self.clyde.rect.y = 16 * TILE_SIZE, 14 * TILE_SIZE
+        self.blinky.rect.x, self.blinky.rect.y = 12 * TILE_SIZE, 17 * TILE_SIZE
+        self.pinky.rect.x, self.pinky.rect.y = 13.5 * TILE_SIZE, 17* TILE_SIZE
+        self.inky.rect.x, self.inky.rect.y = 15 * TILE_SIZE, 17 * TILE_SIZE
+        self.clyde.rect.x, self.clyde.rect.y = 13.5 * TILE_SIZE, 16 * TILE_SIZE
     
     def draw(self):
         # Draw map
