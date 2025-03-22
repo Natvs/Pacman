@@ -234,7 +234,8 @@ class Game:
         for x in range(0, GRID_WIDTH):
             for y in range(0, GRID_HEIGHT):
                 if not self.is_wall(x*TILE_SIZE, y*TILE_SIZE):
-                    self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
+                    if not ((x >= 11 and x <= 16) and (y >= 14 and y <= 17)):
+                        self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
                     
     def is_wall(self, x, y):
         for wall in self.walls:
@@ -272,8 +273,9 @@ class Game:
         self.blinky.update(self.walls, self.pacman)
         self.clyde.update(self.walls, self.pacman)
         
-        # Check for collisions
+        # Check for collisions and dots
         self.check_collisions()
+        self.check_dots()
     
     def check_collisions(self):
         # Check ghost collisions
@@ -288,6 +290,10 @@ class Game:
                         self.state = GAME_OVER
                     else:
                         self.reset_positions()
+
+    def check_dots(self):
+        if len(self.dots) == 0:
+            self.state = GAME_WON
 
         # Check dots collisions
         for dot in self.dots:
@@ -344,6 +350,12 @@ class Game:
         self.screen.blit(lives_text, (10, 40))
         
         if self.state == GAME_OVER:
+            print("game over")
             game_over_text = font.render('GAME OVER', True, RED)
             text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(game_over_text, text_rect)
+        elif self.state == GAME_WON:
+            print("game won")
+            game_won_text = font.render('GAME WON', True, GREEN)
+            text_rect = game_won_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            self.screen.blit(game_won_text, text_rect)

@@ -11,6 +11,7 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
+GREEN = (0, 150, 0)
 
 # Game settings
 FPS = 30
@@ -27,6 +28,7 @@ RIGHT = (1, 0)
 PLAYING = 'playing'
 PAUSED = 'paused'
 GAME_OVER = 'game_over'
+GAME_WON = "game_won"
 
 # Sprite paths
 PACMAN_SPRITE = 'resources/images/pacman.png'

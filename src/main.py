@@ -23,6 +23,19 @@ def main():
         game.draw()
         pygame.display.flip()
         clock.tick(FPS)
+        if game.state == GAME_WON or game.state == GAME_OVER:
+            play = False
+    
+    play = True
+    while play:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            game.handle_input(event)
+            
+        clock.tick(FPS)
+        pass
 
 if __name__ == "__main__":
     main()
