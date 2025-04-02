@@ -11,6 +11,7 @@ from sprites.ghosts.clyde import Clyde
 class Game:
 
     def __init__(self, screen):
+        self.level = 1
         self.screen = screen
         self.state = PLAYING
         self.score = 0
@@ -31,20 +32,30 @@ class Game:
         self.pinky = Pinky(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
         self.inky = Inky(15 * TILE_SIZE, 16.5 * TILE_SIZE)
         self.clyde = Clyde(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
-        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+        self.ghosts = []
 
+        self.set_walls()
         self.reset_positions()
+        self.set_dots()
+        self.update_level()
+    
+    def update_level(self):
+        if (self.level == 1):
+            self.ghosts.append(self.blinky)
+        elif (self.level == 5):
+            self.ghosts.append(self.pinky)
+        elif (self.level == 10):
+            self.ghosts.append(self.inky)
+        elif (self.level == 15):
+            self.ghosts.append(self.clyde)
+        self.reset_positions()
+        self.set_dots()
     
     def load_map(self):
         # Load and scale the map image
         map_image = pygame.image.load(MAP_SPRITE).convert()
         self.map_surface = pygame.transform.scale(map_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        
-        # TODO: Create wall collision boxes based on the map image
-        # This would involve analyzing the map image to create wall sprites
-        # For now, we'll just add boundary walls
-        self.set_walls()
-        self.set_dots()
+
     
     def set_walls(self):
         """Create the walls of the map"""
@@ -293,6 +304,9 @@ class Game:
 
     def check_dots(self):
         if len(self.dots) == 0:
+            self.level += 1
+            self.update_level()
+        if self.level == 30:
             self.state = GAME_WON
 
         # Check dots collisions
