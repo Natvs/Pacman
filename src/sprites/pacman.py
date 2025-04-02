@@ -50,6 +50,11 @@ class Pacman(pygame.sprite.Sprite):
         if self.can_move(self.direction, walls):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
+        if self.rect.y >= 17*TILE_SIZE and self.rect.y <= 18*TILE_SIZE:
+            if self.rect.x < 0:
+                self.rect.x = GRID_WIDTH*TILE_SIZE
+            elif self.rect.x > GRID_WIDTH*TILE_SIZE:
+                self.rect.x = 0
         
         # Try to change to next_direction if we're not already moving in that direction
         if self.next_direction != self.direction and self.can_move(self.next_direction, walls):

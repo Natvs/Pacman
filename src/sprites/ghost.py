@@ -70,16 +70,18 @@ class Ghost(pygame.sprite.Sprite):
             self.direction = self.get_next_direction(wall_group)
             
         # Update position
+
         if self.can_move(self.direction, wall_group):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
             
     def can_move(self, direction, wall_group):
         """Check if the ghost can move in the given direction"""
+
         next_rect = self.rect.copy()
         next_rect.x += direction[0] * self.speed
         next_rect.y += direction[1] * self.speed
-        
+
         for wall in wall_group:
             if next_rect.colliderect(wall.rect):
                 return False

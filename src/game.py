@@ -68,8 +68,9 @@ class Game:
         
         # Left and right walls
         for y in range(0, GRID_HEIGHT*TILE_SIZE, TILE_SIZE):
-            self.walls.append(Wall(0, y))
-            self.walls.append(Wall((GRID_WIDTH - 1)*TILE_SIZE, y))
+            if y < 17 * TILE_SIZE or y >= 18*TILE_SIZE:
+                self.walls.append(Wall(0, y))
+                self.walls.append(Wall((GRID_WIDTH - 1)*TILE_SIZE, y))
 
         # Square 1
         for x in range(2, 6):
