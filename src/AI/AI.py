@@ -3,7 +3,7 @@ from utils.constants import *
 from AI.tools import *
 from game import Game
 from sprites.pacman import Pacman
-from sprites.ghosts import Ghost
+from sprites.ghost import Ghost
 from sprites.wall import Wall
 from sprites.dot import Dot
 
@@ -11,7 +11,7 @@ class AI:
     def __init__(self,game, depth=3):
         self.game=game
         self.depth=depth
-        self.pacamn = game.pacman
+        self.pacman = game.pacman
         self.ghosts = game.ghosts
         self.walls = game.walls
         self.dots = game.dots
@@ -85,8 +85,8 @@ class AI:
                     val = self.alpha_beta(depth-1, alpha, beta, True)
 
                     # Revert ghost's position
-                    ghost.rect.x += old_x
-                    ghost.rect.y += old_y
+                    ghost.rect.x = old_x
+                    ghost.rect.y = old_y
 
                     min_val = min(min_val, val)
                     beta = min(beta, min_val)
@@ -110,13 +110,13 @@ class AI:
             self.game.pacman.rect.x += move[0] * PACMAN_SPEED
             self.game.pacman.rect.y += move[1] * PACMAN_SPEED
             
-            score = self.alpha_beta(self.depth-1, -float('inf'), float('inf'), False)
+            score = self.alpha_beta(self.depth-1, alpha, beta, False)
 
             # Revert Pacman's position
             self.game.pacman.rect.x, self.game.pacman.rect.y = old_x, old_y
             
-            if score > best_score:
-                best_score = score
+            if score > best_evaluation:
+                best_evaluation = score
                 best_move = move
         return best_move
 

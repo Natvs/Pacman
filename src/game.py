@@ -275,6 +275,9 @@ class Game:
     def update(self):
         if self.state != PLAYING:
             return
+        
+        if hasattr(self, 'ai'):
+            self.ai.update()
             
         # Update Pacman
         self.pacman.update(self.walls)
