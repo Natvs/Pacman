@@ -96,7 +96,29 @@ class AI:
 
     
     def get_best_direction(self):
-        pass
+        """Get the best direction for Pacman to move using Alpha-Beta pruning"""
+        best_move = LEFT
+        best_evaluation = -float('inf')
+        alpha = -float('inf')
+        beta = float('inf')
+
+        moves = get_possible_directions(self.pacman,self.walls)
+        for move in moves:
+            old_x, old_y = self.game.pacman.rect.x, self.game.pacman.rect.y
+            
+            # Simulate Pacman's movement
+            self.game.pacman.rect.x += move[0] * PACMAN_SPEED
+            self.game.pacman.rect.y += move[1] * PACMAN_SPEED
+            
+            score = self.alpha_beta(self.depth-1, -float('inf'), float('inf'), False)
+
+            # Revert Pacman's position
+            self.game.pacman.rect.x, self.game.pacman.rect.y = old_x, old_y
+            
+            if score > best_score:
+                best_score = score
+                best_move = move
+        return best_move
 
     def update(self):
         """Update the AI's decision-making process"""
