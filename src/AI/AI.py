@@ -42,4 +42,18 @@ class AI:
 
         return evaluation
     
+    def alpha_beta(self, depth, alpha, beta, maximizing_player):
+        """Perform the Alpha-Beta pruning algorithm to find the best move"""
+
+        # Base case: if depth is 0 or game over, evaluate the state
+        if depth==0 or self.game.lives<=0 or not self.dots:
+            return self.evaluate()
+        return
     
+    def get_best_direction(self):
+        pass
+
+    def update(self):
+        """Update the AI's decision-making process"""
+        best_direction = self.get_best_direction()
+        self.pacman.set_direction(best_direction)
