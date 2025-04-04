@@ -42,13 +42,58 @@ class AI:
 
         return evaluation
     
-    def alpha_beta(self, depth, alpha, beta, maximizing_player):
+    def alpha_beta(self, depth, alpha, beta, is_pacman_turn):
         """Perform the Alpha-Beta pruning algorithm to find the best move"""
 
         # Base case: if depth is 0 or game over, evaluate the state
         if depth==0 or self.game.lives<=0 or not self.dots:
             return self.evaluate()
-        return
+        
+        if is_pacman_turn:
+            max_val = -float('inf')
+            moves = get_possible_directions(self.pacman,self.walls)
+            for move in moves:
+                old_x, old_y = self.pacman.rect.x, self.pacman.rect.y
+
+                # Simulate Pacman's movement
+                self.game.pacman.rect.x += move[0] * PACMAN_SPEED
+                self.game.pacman.rect.y += move[1] * PACMAN_SPEED
+
+                val = self.alpha_beta(depth-1, alpha, beta, False)
+
+                # Revert Pacman's position
+                self.game.pacman.rect.x = old_x
+                self.game.pacman.rect.y = old_y
+
+                max_val = max(max_val, val)
+                alpha = max(alpha, max_val)
+                if beta <= alpha:
+                    break
+            return max_val
+
+        else:
+            min_val = float('inf')
+            moves = [UP, DOWN, LEFT, RIGHT]
+            for ghost in self.ghosts:
+                for move in moves:
+                    old_x, old_y = ghost.rect.x, ghost.rect.y
+
+                    #Simulate ghost movement
+                    ghost.rect.x += move[0] * GHOST_SPEED
+                    ghost.rect.y += move[1] * GHOST_SPEED
+
+                    val = self.alpha_beta(depth-1, alpha, beta, True)
+
+                    # Revert ghost's position
+                    ghost.rect.x += old_x
+                    ghost.rect.y += old_y
+
+                    min_val = min(min_val, val)
+                    beta = min(beta, min_val)
+                    if beta <= alpha:
+                        break
+            return min_val
+
     
     def get_best_direction(self):
         pass
