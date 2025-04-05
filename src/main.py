@@ -10,7 +10,7 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    game.ai = AI(game, depth=3)
+    game.ai = AI(game, depth=5)
     
     play = True
     while play:
