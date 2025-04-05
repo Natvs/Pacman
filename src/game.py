@@ -336,12 +336,12 @@ class Game:
         self.screen.blit(self.map_surface, (0, 0))
         
         # Draw walls
-        tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        """tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
         for wall in self.walls:
             pygame.draw.rect(tmp, BLUE, wall.rect)
         walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
-        self.screen.blit(walls_surface, (0, 0))
+        self.screen.blit(walls_surface, (0, 0))"""
 
         # Draw dots
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
