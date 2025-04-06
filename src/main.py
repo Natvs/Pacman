@@ -3,6 +3,7 @@ import sys
 from utils.constants import *
 from game import Game
 from AI.AI import AI
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -10,7 +11,7 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    game.ai = AI(game, depth=5)
+    game.ai = AI(game, depth=3)  # Initialize AI with a depth of 5
     
     play = True
     while play:

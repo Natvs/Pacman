@@ -25,4 +25,4 @@ def get_possible_directions(pacman,walls):
          if pacman.can_move(direction,walls):
             possible_directions.append(direction)
     
-    return possible_directions if possible_directions else [LEFT]
+    return possible_directions

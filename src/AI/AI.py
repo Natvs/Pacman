@@ -15,6 +15,7 @@ class AI:
         self.ghosts = game.ghosts
         self.walls = game.walls
         self.dots = game.dots
+        self.last_positions = []
 
     def evaluate(self):
         """Evaluate the current state of the game"""
@@ -35,10 +36,11 @@ class AI:
 
         for dot in self.dots:
             dot_distance = math.sqrt((self.pacman.rect.x - dot.rect.x)**2 + (self.pacman.rect.y - dot.rect.y)**2)
-            evaluation += 50/max(1,dot_distance)
+            evaluation += 30/max(1,dot_distance)
         
-        if count_adjacent_walls(self.pacman,self.walls) >= 2:
-            evaluation -= 100  # Penalize if Pacman is surrounded by walls
+        wall_count = count_adjacent_walls(self.pacman, self.walls)
+        if wall_count >= 2:
+            evaluation -= 100*wall_count  # Penalize if Pacman is surrounded by walls
 
         return evaluation
     
@@ -97,7 +99,7 @@ class AI:
     
     def get_best_direction(self):
         """Get the best direction for Pacman to move using Alpha-Beta pruning"""
-        best_move = LEFT
+        best_move = self.pacman.direction
         best_evaluation = -float('inf')
         alpha = -float('inf')
         beta = float('inf')
@@ -110,14 +112,23 @@ class AI:
             self.game.pacman.rect.x += move[0] * PACMAN_SPEED
             self.game.pacman.rect.y += move[1] * PACMAN_SPEED
             
-            score = self.alpha_beta(self.depth-1, alpha, beta, False)
-
+            current_pos = (self.game.pacman.rect.x, self.game.pacman.rect.y)
+            if current_pos in self.last_positions:
+                score = -float('inf') # Penalize if Pacman is in the same position as before
+            else:
+                score = self.alpha_beta(self.depth-1, alpha, beta, False)
+            
             # Revert Pacman's position
             self.game.pacman.rect.x, self.game.pacman.rect.y = old_x, old_y
             
             if score > best_evaluation:
                 best_evaluation = score
                 best_move = move
+        
+        self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
+        if len(self.last_positions) > 5:  #Keep the last 5 positions
+            self.last_positions.pop(0)
+
         return best_move
 
     def update(self):
