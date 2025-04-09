@@ -14,7 +14,7 @@ RED = (255, 0, 0)
 GREEN = (0, 150, 0)
 
 # Game settings
-FPS = 30
+FPS = 50
 PACMAN_SPEED = 2
 GHOST_SPEED = 1
 

@@ -5,6 +5,14 @@ class Inky(Ghost):
     def __init__(self, x, y):
         super().__init__(x, y, INKY_SPRITE)
         
+    def clone(self):
+        new_ghost = Inky(self.rect.x, self.rect.y)
+        new_ghost.direction = self.direction
+        new_ghost.speed = self.speed
+        new_ghost.state = self.state
+        new_ghost.target_tile = self.target_tile
+        return new_ghost
+
     def update(self, wall_group, pacman, blinky):
         """Inky uses both Pacman and Blinky's position for targeting"""
         if self.state == 'normal':

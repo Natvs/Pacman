@@ -10,37 +10,59 @@ from sprites.ghosts.clyde import Clyde
 
 class Game:
 
-    def __init__(self, screen):
-        self.level = 1
-        self.screen = screen
-        self.state = PLAYING
-        self.score = 0
-        self.lives = 3
-        
-        self.walls = []
-        self.dots = []
-        
-        # Initialize game map
-        self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.load_map()
-        
-        # Create Pacman
-        self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE)
-        
-        # Create ghosts
-        self.blinky = Blinky(12* TILE_SIZE, 16.5 * TILE_SIZE)
-        self.pinky = Pinky(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
-        self.inky = Inky(15 * TILE_SIZE, 16.5 * TILE_SIZE)
-        self.clyde = Clyde(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
-        self.ghosts = []
+    def __init__(self, screen=None, init = True):
+        if (init):
+            self.level = 1
+            self.screen = screen
+            self.state = PLAYING
+            self.score = 0
+            self.lives = 3
+            
+            self.walls = []
+            self.dots = []
+            
+            # Initialize game map
+            self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+            self.load_map()
+            
+            # Create Pacman
+            self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE, None)
+            
+            # Create ghosts
+            self.blinky = Blinky(12* TILE_SIZE, 16.5 * TILE_SIZE)
+            self.pinky = Pinky(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
+            self.inky = Inky(15 * TILE_SIZE, 16.5 * TILE_SIZE)
+            self.clyde = Clyde(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
+            self.ghosts = []
 
-        self.set_walls()
-        self.reset_positions()
-        self.set_dots()
-        self.update_level()
+            self.set_walls()
+            self.reset_positions()
+            self.set_dots()
+            self.update_level()
     
+    def clone(self) -> 'Game':
+        new_game = Game(init=False)
+        new_game.level = self.level
+        new_game.state = self.state
+        new_game.score = self.score
+        new_game.lives = self.lives
+        new_game.dots = self.dots
+        new_game.pacman = self.pacman.clone()
+
+        new_game.blinky = self.blinky.clone()
+        new_game.pinky = self.pinky.clone()
+        new_game.inky = self.inky.clone()
+        new_game.clyde = self.clyde.clone()
+
+        new_game.walls = self.walls
+        new_game.dots = [dot for dot in self.dots]
+        new_game.ghosts = [ghost.clone() for ghost in self.ghosts]
+        new_game.map_surface = self.map_surface.copy()
+        return new_game
+
+
     def update_level(self):
-        if (self.level == 1):
+        if (self.level == 2):
             self.ghosts.append(self.blinky)
         elif (self.level == 5):
             self.ghosts.append(self.pinky)
@@ -55,8 +77,7 @@ class Game:
         # Load and scale the map image
         map_image = pygame.image.load(MAP_SPRITE).convert()
         self.map_surface = pygame.transform.scale(map_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-
-    
+   
     def set_walls(self):
         """Create the walls of the map"""
         # Create wall sprites for the boundaries
@@ -231,7 +252,7 @@ class Game:
 
         # Home
         for y in range(14, 16):
-            for x in range(11, 13):
+            for x in range(11, 15):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
             for x in range(15, 17):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
@@ -377,3 +398,4 @@ class Game:
             game_won_text = font.render('GAME WON', True, GREEN)
             text_rect = game_won_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(game_won_text, text_rect)
+

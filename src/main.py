@@ -11,7 +11,7 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    game.ai = AI(game, depth=3)  # Initialize AI with a depth of 5
+    game.ai = AI(game, depth=3)  # Initializes AI with a depth of 4
     
     play = True
     while play:

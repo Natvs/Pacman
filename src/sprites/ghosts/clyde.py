@@ -7,6 +7,15 @@ class Clyde(Ghost):
         super().__init__(x, y, CLYDE_SPRITE)
         self.scatter_tile = (0, GRID_HEIGHT - 1)  # Bottom-left corner
         
+    def clone(self):
+        new_ghost = Clyde(self.rect.x, self.rect.y)
+        new_ghost.direction = self.direction
+        new_ghost.speed = self.speed
+        new_ghost.state = self.state
+        new_ghost.target_tile = self.target_tile
+        new_ghost.scatter_tile = self.scatter_tile
+        return new_ghost
+
     def update(self, wall_group, pacman):
         """Clyde targets Pacman directly when far, but runs away when close"""
         if self.state == 'normal':

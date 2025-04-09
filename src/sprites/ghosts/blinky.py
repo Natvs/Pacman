@@ -4,7 +4,15 @@ from utils.constants import *
 class Blinky(Ghost):
     def __init__(self, x, y):
         super().__init__(x, y, BLINKY_SPRITE)
-        
+    
+    def clone(self):
+        new_ghost = Blinky(self.rect.x, self.rect.y)
+        new_ghost.direction = self.direction
+        new_ghost.speed = self.speed
+        new_ghost.state = self.state
+        new_ghost.target_tile = self.target_tile
+        return new_ghost
+
     def update(self, wall_group, pacman):
         """Blinky directly targets Pacman's current position"""
         if self.state == 'normal':
