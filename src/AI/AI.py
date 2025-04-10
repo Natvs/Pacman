@@ -16,28 +16,41 @@ class AI:
         self.walls = game.walls
         self.dots = game.dots
         self.last_positions = []
+        self.back_countdown = PACMAN_IA_BACKCOUNTDOWN
 
+    def distance(self, x1, x2, y1, y2, type = 'manhattan', coef=1):
+        if type == 'manhattan':
+            return abs(x1 - x2) + abs(y1 - y2)
+        elif type == 'euclidean':
+            return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+        elif type == 'exponential':
+            return math.pow(coef * (abs(x1 - x2) + abs(y1 - y2)), 2)
+            
     def evaluate(self, game:Game):
-        """Evaluate the current state of the game"""
+        """Evaluates the current state of the game"""
         # This function evaluates the current state of the game based on Pacman's position, ghost positions, and dot positions.
 
         evaluation=0
         evaluation+=game.score # Pacman's score is a positive factor
 
         for ghost in game.ghosts:
-            ghost_distance = math.sqrt((game.pacman.rect.x - ghost.rect.x)**2 + (game.pacman.rect.y - ghost.rect.y)**2)
-            
-            # If the gohst is frightened, we want to get closer to it
+            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='exponential', coef=0.1)
+
+            # If the ghost is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
             if ghost.state == 'frightened':
                 evaluation += (100 / max(1, ghost_distance))
                 pass
             elif ghost.state == 'normal':
-                evaluation -= (20 / max(1, ghost_distance))
+                if ghost_distance < 2*TILE_SIZE:
+                    evaluation -= 5000 / ghost_distance  # If Pacman is too close to a ghost, it's game over
+                else:
+                    evaluation -= 1 / ghost_distance
+                pass
 
         for dot in game.dots:
-            dot_distance = math.sqrt((game.pacman.rect.x - dot.rect.x)**2 + (game.pacman.rect.y - dot.rect.y)**2)
-            evaluation += 30 / (len(game.dots) * max(1, dot_distance))  # Closer to the dot is better
+            dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
+            evaluation += 1 / (len(game.dots) * dot_distance)  # Closer to the dot is better
 
         '''wall_count = count_adjacent_walls(game.pacman, game.walls)
         if wall_count >= 2:
@@ -53,7 +66,7 @@ class AI:
             return self.evaluate(game)
         
         max_val = -float('inf')
-        moves = get_possible_directions(game.pacman,game.walls)
+        moves = get_possible_directions(game)
         for move in moves:
             # Simulate Pacman's movement
 
@@ -80,7 +93,13 @@ class AI:
         alpha = -float('inf')
         beta = float('inf')
 
-        moves = get_possible_directions(self.pacman,self.walls)
+        for ghost in self.ghosts:
+            ghost_distance = self.distance(self.pacman.rect.x, ghost.rect.x, self.pacman.rect.y, ghost.rect.y, type='manhattan')
+            if ghost_distance < 4*TILE_SIZE:
+                self.last_positions.clear()  # Clear the last positions if Pacman is too close to a ghost
+                break
+
+        moves = get_possible_directions(self.game)
         for move in moves:
             # Simulate Pacman's movement
             new_game = self.game.clone()
@@ -88,7 +107,7 @@ class AI:
             new_game.update()
 
             current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
-            if current_pos in self.last_positions:
+            if current_pos in self.last_positions:             
                 score = -float('inf') # Penalize if Pacman is in the same position as before
             else:
                 score = self.alpha_beta(new_game, self.depth-1, alpha, beta, False)
@@ -97,13 +116,11 @@ class AI:
                 best_move = move
 
             del new_game
-        
-        if best_evaluation == -float('inf'):
-            print(moves, best_move, best_evaluation)
 
-        self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
-        if len(self.last_positions) > PACMAN_IA_MEMORY:  #Keep the lasts positions
-            self.last_positions.pop(0)
+        if (PACMAN_IA_MEMORY > 0):
+            self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
+            if len(self.last_positions) > PACMAN_IA_MEMORY:  #Keep the lasts positions
+                self.last_positions.pop(0)
 
         return best_move
 

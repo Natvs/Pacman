@@ -21,6 +21,7 @@ class Game:
             
             self.home_walls = []
             self.walls = []
+            self.access = []
             self.dots = []
             
             # Initialize game map
@@ -38,6 +39,7 @@ class Game:
             self.ghosts = []
 
             self.set_walls()
+            self.set_access()
             self.reset_game()
             self.update_level()
     
@@ -56,8 +58,9 @@ class Game:
         new_game.inky = self.inky.clone()
         new_game.clyde = self.clyde.clone()
 
-        new_game.home_walls = [wall for wall in self.home_walls]
-        new_game.walls = [wall for wall in self.walls]
+        #new_game.home_walls = [wall for wall in self.home_walls]
+        #new_game.walls = [wall for wall in self.walls]
+        new_game.access = self.access
         new_game.dots = [dot for dot in self.dots]
         new_game.ghosts = [ghost.clone() for ghost in self.ghosts]
         new_game.map_surface = self.map_surface.copy()
@@ -81,6 +84,39 @@ class Game:
         map_image = pygame.image.load(MAP_SPRITE).convert()
         self.map_surface = pygame.transform.scale(map_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
    
+    def set_access(self):
+        self.access = []
+        for x in range(0, GRID_WIDTH*TILE_SIZE + 2*TILE_SIZE):
+            self.access.append([True for _ in range(0, GRID_HEIGHT*TILE_SIZE + 2*TILE_SIZE)])
+        
+        for wall in self.walls:
+            for x in range(0, TILE_SIZE):
+                for y in range(0, TILE_SIZE):
+                    self.access[wall.rect.x+x+TILE_SIZE][wall.rect.y+y+TILE_SIZE] = False
+    
+    def get_access(self, x, y):
+        if (x > GRID_WIDTH*TILE_SIZE or y > GRID_HEIGHT*TILE_SIZE or x < 0 or y < 0):
+            return False
+        x += TILE_SIZE
+        y += TILE_SIZE
+        return self.access[x][y] and self.access[x+TILE_SIZE-1][y] and self.access[x][y+TILE_SIZE-1] and self.access[x+TILE_SIZE-1][y+TILE_SIZE-1]
+
+    def add_home_walls(self):
+        if hasattr(self, 'walls'):
+            for y in range(14, 16):
+                for x in range(13, 15):
+                    wall = Wall(x*TILE_SIZE, y*TILE_SIZE)
+                    self.home_walls.append(wall)
+                    self.walls.append(wall)
+            self.set_access()
+    
+    def remove_home_walls(self):
+        if hasattr(self, 'walls'):
+            for wall in self.home_walls:
+                self.walls.remove(wall)
+            self.home_walls = []
+            self.set_access()
+
     def set_walls(self):
         """Create the walls of the map"""
         # Create wall sprites for the boundaries
@@ -269,7 +305,7 @@ class Game:
     def set_dots(self):
         for x in range(0, GRID_WIDTH):
             for y in range(0, GRID_HEIGHT):
-                if not self.is_wall(x*TILE_SIZE, y*TILE_SIZE):
+                if self.get_access(x*TILE_SIZE, y*TILE_SIZE):
                     if not ((x >= 11 and x <= 16) and (y >= 14 and y <= 17)):
                         self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
                     
@@ -295,18 +331,6 @@ class Game:
                     self.state = PAUSED
             elif self.state == PAUSED and event.key == pygame.K_p:
                 self.state = PLAYING
-    
-    def add_home_walls(self):
-        for y in range(14, 16):
-            for x in range(13, 15):
-                wall = Wall(x*TILE_SIZE, y*TILE_SIZE)
-                self.home_walls.append(wall)
-                self.walls.append(wall)
-    
-    def remove_home_walls(self):
-        for wall in self.home_walls:
-            self.walls.remove(wall)
-        self.home_walls = []
 
     def update(self):
         if self.state != PLAYING:
@@ -316,22 +340,22 @@ class Game:
             self.ai.update()
             
         # Update Pacman
-        self.pacman.update(self.walls)
+        self.pacman.update(self)
         
         # Update ghosts
         if self.movement_count <= GHOST_FIRST_TARGET_MOVEMENT:
-            self.inky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
-            self.pinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
-            self.blinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
-            self.clyde.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
+            self.inky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+            self.pinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+            self.blinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+            self.clyde.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
             if self.movement_count == GHOST_FIRST_TARGET_MOVEMENT:
                 self.add_home_walls()
 
         else:
-            self.inky.update(self.walls, self.pacman, self.blinky)
-            self.pinky.update(self.walls, self.pacman)
-            self.blinky.update(self.walls, self.pacman)
-            self.clyde.update(self.walls, self.pacman)
+            self.inky.update(self)
+            self.pinky.update(self)
+            self.blinky.update(self)
+            self.clyde.update(self)
         
         # Check for collisions and dots
         self.check_collisions()
@@ -386,12 +410,12 @@ class Game:
         self.screen.blit(self.map_surface, (0, 0))
         
         # Draw walls
-        tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        '''tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
         for wall in self.walls:
             pygame.draw.rect(tmp, BLUE, wall.rect)
         walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
-        self.screen.blit(walls_surface, (0, 0))
+        self.screen.blit(walls_surface, (0, 0))'''
 
         # Draw dots
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)

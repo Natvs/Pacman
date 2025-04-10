@@ -1,4 +1,5 @@
 import pygame
+#from game import Game
 from utils.constants import *
 import math
 
@@ -23,20 +24,20 @@ class Ghost(pygame.sprite.Sprite):
         """Convert pixel position to tile position"""
         return (self.rect.x // TILE_SIZE, self.rect.y // TILE_SIZE)
         
-    def set_target(self, target_x, target_y, update=False, wall_group=None):
+    def set_target(self, target_x, target_y, update=False, game=None):
         """Set the target tile for the ghost to move towards"""
         self.target_tile = (target_x, target_y)
         if update:
-            self._update(wall_group)
+            self._update(game)
         
-    def get_next_direction(self, wall_group):
+    def get_next_direction(self, game):
         """Determine the next direction based on available paths and target"""
         if not self.target_tile:
             return self.direction
             
         possible_directions = []
         for direction in [UP, DOWN, LEFT, RIGHT]:
-            if self.can_move(direction, wall_group):
+            if game.get_access(self.rect.x + direction[0] * self.speed, self.rect.y + direction[1] * self.speed):
                 possible_directions.append(direction)
                 
         if not possible_directions:
@@ -67,29 +68,28 @@ class Ghost(pygame.sprite.Sprite):
                 
         return best_direction
         
-    def update(self, wall_group):
-        self._update(wall_group)
+    def update(self, game):
+        self._update(game)
     
-    def _update(self, wall_group):
+    def _update(self, game):
         if self.state == 'normal':
-            self.direction = self.get_next_direction(wall_group)
+            self.direction = self.get_next_direction(game)
             
         # Update position
 
-        if self.can_move(self.direction, wall_group):
+        if self.can_move(self.direction, game):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
             
-    def can_move(self, direction, wall_group):
+    def can_move(self, direction, game):
         """Check if the ghost can move in the given direction"""
 
         next_rect = self.rect.copy()
         next_rect.x += direction[0] * self.speed
         next_rect.y += direction[1] * self.speed
 
-        for wall in wall_group:
-            if next_rect.colliderect(wall.rect):
-                return False
+        if not game.get_access(next_rect.x, next_rect.y):
+            return False
         return True
         
     def set_frightened(self):

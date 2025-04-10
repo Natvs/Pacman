@@ -11,7 +11,7 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    game.ai = AI(game, depth=3)  # Initializes AI with a depth of 4
+    game.ai = AI(game, depth=PACMAN_IA_LOOKAHEAD)  # Initializes AI with a depth of 4
     
     play = True
     while play:

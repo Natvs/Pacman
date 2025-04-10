@@ -1,4 +1,5 @@
 from ..ghost import Ghost
+#from game import Game
 from utils.constants import *
 
 class Inky(Ghost):
@@ -13,16 +14,16 @@ class Inky(Ghost):
         new_ghost.target_tile = self.target_tile
         return new_ghost
 
-    def update(self, wall_group, pacman, blinky):
+    def update(self, game):
         """Inky uses both Pacman and Blinky's position for targeting"""
         if self.state == 'normal':
             # First, get the position 2 tiles ahead of Pacman
-            pacman_tile = (pacman.rect.x // TILE_SIZE, pacman.rect.y // TILE_SIZE)
-            intermediate_x = pacman_tile[0] + (2 * pacman.direction[0])
-            intermediate_y = pacman_tile[1] + (2 * pacman.direction[1])
+            pacman_tile = (game.pacman.rect.x // TILE_SIZE, game.pacman.rect.y // TILE_SIZE)
+            intermediate_x = pacman_tile[0] + (2 * game.pacman.direction[0])
+            intermediate_y = pacman_tile[1] + (2 * game.pacman.direction[1])
             
             # Get Blinky's position
-            blinky_tile = (blinky.rect.x // TILE_SIZE, blinky.rect.y // TILE_SIZE)
+            blinky_tile = (game.blinky.rect.x // TILE_SIZE, game.blinky.rect.y // TILE_SIZE)
             
             # Calculate the vector from Blinky to the intermediate point
             vector_x = intermediate_x - blinky_tile[0]
@@ -45,4 +46,4 @@ class Inky(Ghost):
             # Return to ghost house
             self.set_target(14, 14)  # Center of ghost house
             
-        super().update(wall_group)
+        super().update(game)

@@ -17,12 +17,12 @@ def is_wall(walls, x, y):
              return True
     return False
 
-def get_possible_directions(pacman,walls):
+def get_possible_directions(game):
     """Get possible directions for Pacman to move"""
     possible_directions = []
 
     for direction in [UP, DOWN, LEFT, RIGHT]:
-         if pacman.can_move(direction, walls):
+         if game.pacman.can_move(direction, game):
             possible_directions.append(direction)
     
     return possible_directions

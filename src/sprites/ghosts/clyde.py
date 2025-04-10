@@ -1,4 +1,5 @@
 from ..ghost import Ghost
+#from game import Game
 from utils.constants import *
 import math
 
@@ -16,10 +17,10 @@ class Clyde(Ghost):
         new_ghost.scatter_tile = self.scatter_tile
         return new_ghost
 
-    def update(self, wall_group, pacman):
+    def update(self, game):
         """Clyde targets Pacman directly when far, but runs away when close"""
         if self.state == 'normal':
-            pacman_tile = (pacman.rect.x // TILE_SIZE, pacman.rect.y // TILE_SIZE)
+            pacman_tile = (game.pacman.rect.x // TILE_SIZE, game.pacman.rect.y // TILE_SIZE)
             current_tile = self.get_tile_pos()
             
             # Calculate distance to Pacman
@@ -42,4 +43,4 @@ class Clyde(Ghost):
             # Return to ghost house
             self.set_target(14, 14)  # Center of ghost house
             
-        super().update(wall_group)
+        super().update(game)
