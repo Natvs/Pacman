@@ -25,7 +25,14 @@ class AI:
             return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
         elif type == 'exponential':
             return math.pow(coef * (abs(x1 - x2) + abs(y1 - y2)), 2)
-            
+        elif type == 'custom':
+            dist = self.distance(x1, x2, y1, y2, type='exponential', coef=coef)
+            for x in range(x1, x2, TILE_SIZE):
+                for y in range(y1, y2, TILE_SIZE):
+                    if not self.game.get_access(x, y):
+                        return 2 * dist
+            return dist
+
     def evaluate(self, game:Game):
         """Evaluates the current state of the game"""
         # This function evaluates the current state of the game based on Pacman's position, ghost positions, and dot positions.
@@ -34,7 +41,7 @@ class AI:
         evaluation+=game.score # Pacman's score is a positive factor
 
         for ghost in game.ghosts:
-            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='exponential', coef=0.1)
+            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='custom', coef=0.1)
 
             # If the ghost is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
@@ -43,7 +50,7 @@ class AI:
                 pass
             elif ghost.state == 'normal':
                 if ghost_distance < 2*TILE_SIZE:
-                    evaluation -= 5000 / ghost_distance  # If Pacman is too close to a ghost, it's game over
+                    evaluation -= 100 / ghost_distance  # If Pacman is too close to a ghost, it's game over
                 else:
                     evaluation -= 1 / ghost_distance
                 pass
