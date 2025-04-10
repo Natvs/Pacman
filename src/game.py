@@ -17,7 +17,9 @@ class Game:
             self.state = PLAYING
             self.score = 0
             self.lives = 3
+            self.movement_count = 0
             
+            self.home_walls = []
             self.walls = []
             self.dots = []
             
@@ -36,8 +38,7 @@ class Game:
             self.ghosts = []
 
             self.set_walls()
-            self.reset_positions()
-            self.set_dots()
+            self.reset_game()
             self.update_level()
     
     def clone(self) -> 'Game':
@@ -45,6 +46,7 @@ class Game:
         new_game.level = self.level
         new_game.state = self.state
         new_game.score = self.score
+        new_game.movement_count = self.movement_count
         new_game.lives = self.lives
         new_game.dots = self.dots
         new_game.pacman = self.pacman.clone()
@@ -54,7 +56,8 @@ class Game:
         new_game.inky = self.inky.clone()
         new_game.clyde = self.clyde.clone()
 
-        new_game.walls = self.walls
+        new_game.home_walls = [wall for wall in self.home_walls]
+        new_game.walls = [wall for wall in self.walls]
         new_game.dots = [dot for dot in self.dots]
         new_game.ghosts = [ghost.clone() for ghost in self.ghosts]
         new_game.map_surface = self.map_surface.copy()
@@ -62,7 +65,7 @@ class Game:
 
 
     def update_level(self):
-        if (self.level == 2):
+        if (self.level == 1):
             self.ghosts.append(self.blinky)
         elif (self.level == 5):
             self.ghosts.append(self.pinky)
@@ -70,7 +73,7 @@ class Game:
             self.ghosts.append(self.inky)
         elif (self.level == 15):
             self.ghosts.append(self.clyde)
-        self.reset_positions()
+        self.reset_game()
         self.set_dots()
     
     def load_map(self):
@@ -89,7 +92,7 @@ class Game:
         
         # Left and right walls
         for y in range(0, GRID_HEIGHT*TILE_SIZE, TILE_SIZE):
-            if y < 17 * TILE_SIZE or y >= 18*TILE_SIZE:
+            if y < 16 * TILE_SIZE or y >= 17*TILE_SIZE:
                 self.walls.append(Wall(0, y))
                 self.walls.append(Wall((GRID_WIDTH - 1)*TILE_SIZE, y))
 
@@ -140,22 +143,22 @@ class Game:
         
         # Rectangle 6
         for x in range(1, 6):
-            for y in range(10, 17):
+            for y in range(10, 16):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
         
         # Rectangle 7
         for x in range(22, 27):
-            for y in range(10, 17):
+            for y in range(10, 16):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
 
         # Rectangle 8
         for x in range(1, 6):
-            for y in range(18, 23):
+            for y in range(17, 23):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
 
         # Rectangle 9
         for x in range(22, 27):
-            for y in range(18, 23):
+            for y in range(17, 23):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
 
         # Rectangle 10
@@ -252,7 +255,7 @@ class Game:
 
         # Home
         for y in range(14, 16):
-            for x in range(11, 15):
+            for x in range(11, 13):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
             for x in range(15, 17):
                 self.walls.append(Wall(x*TILE_SIZE, y*TILE_SIZE))
@@ -293,6 +296,18 @@ class Game:
             elif self.state == PAUSED and event.key == pygame.K_p:
                 self.state = PLAYING
     
+    def add_home_walls(self):
+        for y in range(14, 16):
+            for x in range(13, 15):
+                wall = Wall(x*TILE_SIZE, y*TILE_SIZE)
+                self.home_walls.append(wall)
+                self.walls.append(wall)
+    
+    def remove_home_walls(self):
+        for wall in self.home_walls:
+            self.walls.remove(wall)
+        self.home_walls = []
+
     def update(self):
         if self.state != PLAYING:
             return
@@ -304,14 +319,25 @@ class Game:
         self.pacman.update(self.walls)
         
         # Update ghosts
-        self.inky.update(self.walls, self.pacman, self.blinky)
-        self.pinky.update(self.walls, self.pacman)
-        self.blinky.update(self.walls, self.pacman)
-        self.clyde.update(self.walls, self.pacman)
+        if self.movement_count <= GHOST_FIRST_TARGET_MOVEMENT:
+            self.inky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
+            self.pinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
+            self.blinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
+            self.clyde.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, wall_group=self.walls)
+            if self.movement_count == GHOST_FIRST_TARGET_MOVEMENT:
+                self.add_home_walls()
+
+        else:
+            self.inky.update(self.walls, self.pacman, self.blinky)
+            self.pinky.update(self.walls, self.pacman)
+            self.blinky.update(self.walls, self.pacman)
+            self.clyde.update(self.walls, self.pacman)
         
         # Check for collisions and dots
         self.check_collisions()
         self.check_dots()
+        
+        self.movement_count += 1
     
     def check_collisions(self):
         # Check ghost collisions
@@ -325,7 +351,7 @@ class Game:
                     if self.lives <= 0:
                         self.state = GAME_OVER
                     else:
-                        self.reset_positions()
+                        self.reset_game()
 
     def check_dots(self):
         if len(self.dots) == 0:
@@ -340,7 +366,7 @@ class Game:
                 self.score += 1
                 self.dots.remove(dot)
     
-    def reset_positions(self):
+    def reset_game(self):
         """Reset positions of Pacman and ghosts after losing a life"""
         self.pacman.rect.x = 13.5 * TILE_SIZE
         self.pacman.rect.y = 20 * TILE_SIZE
@@ -351,18 +377,21 @@ class Game:
         self.pinky.rect.x, self.pinky.rect.y = 13.5 * TILE_SIZE, 17* TILE_SIZE
         self.inky.rect.x, self.inky.rect.y = 15 * TILE_SIZE, 17 * TILE_SIZE
         self.clyde.rect.x, self.clyde.rect.y = 13.5 * TILE_SIZE, 16 * TILE_SIZE
+
+        self.remove_home_walls()
+        self.movement_count = 0
     
     def draw(self):
         # Draw map
         self.screen.blit(self.map_surface, (0, 0))
         
         # Draw walls
-        """tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
         for wall in self.walls:
             pygame.draw.rect(tmp, BLUE, wall.rect)
         walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
-        self.screen.blit(walls_surface, (0, 0))"""
+        self.screen.blit(walls_surface, (0, 0))
 
         # Draw dots
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)

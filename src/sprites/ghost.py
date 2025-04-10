@@ -14,7 +14,7 @@ class Ghost(pygame.sprite.Sprite):
         self.speed = GHOST_SPEED
         self.state = 'normal'  # normal, frightened, eaten
         self.target_tile = None
-        
+
     def load_sprites(self):
         sprite_sheet = pygame.image.load(self.sprite_path).convert_alpha()
         self.image = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
@@ -23,9 +23,11 @@ class Ghost(pygame.sprite.Sprite):
         """Convert pixel position to tile position"""
         return (self.rect.x // TILE_SIZE, self.rect.y // TILE_SIZE)
         
-    def set_target(self, target_x, target_y):
+    def set_target(self, target_x, target_y, update=False, wall_group=None):
         """Set the target tile for the ghost to move towards"""
         self.target_tile = (target_x, target_y)
+        if update:
+            self._update(wall_group)
         
     def get_next_direction(self, wall_group):
         """Determine the next direction based on available paths and target"""
@@ -66,6 +68,9 @@ class Ghost(pygame.sprite.Sprite):
         return best_direction
         
     def update(self, wall_group):
+        self._update(wall_group)
+    
+    def _update(self, wall_group):
         if self.state == 'normal':
             self.direction = self.get_next_direction(wall_group)
             

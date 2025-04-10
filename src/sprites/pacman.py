@@ -54,12 +54,14 @@ class Pacman(pygame.sprite.Sprite):
         if self.can_move(self.direction, walls):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
-            
-            if self.rect.y >= 17*TILE_SIZE and self.rect.y <= 18*TILE_SIZE:
+
+
+            # When pacman is on a tile to teleport
+            if self.rect.y >= 16*TILE_SIZE and self.rect.y <= 17*TILE_SIZE:
                 if self.rect.x < 0:
-                    self.rect.x = GRID_WIDTH*TILE_SIZE
+                    self.rect.x = GRID_WIDTH*TILE_SIZE-2
                 elif self.rect.x > GRID_WIDTH*TILE_SIZE:
-                    self.rect.x = 0
+                    self.rect.x = 2
         
         
         # Handle animation

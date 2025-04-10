@@ -24,21 +24,20 @@ class AI:
         evaluation=0
         evaluation+=game.score # Pacman's score is a positive factor
 
-        '''for ghost in game.ghosts:
+        for ghost in game.ghosts:
             ghost_distance = math.sqrt((game.pacman.rect.x - ghost.rect.x)**2 + (game.pacman.rect.y - ghost.rect.y)**2)
             
             # If the gohst is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
             if ghost.state == 'frightened':
-                evaluation += (200 / max(1, ghost_distance))
+                evaluation += (100 / max(1, ghost_distance))
                 pass
             elif ghost.state == 'normal':
-                evaluation -= (300 / max(1, ghost_distance))
-                '''
+                evaluation -= (20 / max(1, ghost_distance))
 
         for dot in game.dots:
             dot_distance = math.sqrt((game.pacman.rect.x - dot.rect.x)**2 + (game.pacman.rect.y - dot.rect.y)**2)
-            evaluation += 1 / max(1, dot_distance)  # Closer to the dot is better
+            evaluation += 30 / (len(game.dots) * max(1, dot_distance))  # Closer to the dot is better
 
         '''wall_count = count_adjacent_walls(game.pacman, game.walls)
         if wall_count >= 2:
@@ -82,30 +81,28 @@ class AI:
         beta = float('inf')
 
         moves = get_possible_directions(self.pacman,self.walls)
-        print("NEW TURN")
         for move in moves:
             # Simulate Pacman's movement
             new_game = self.game.clone()
             new_game.pacman.set_direction(move)
             new_game.update()
-            
+
             current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
             if current_pos in self.last_positions:
                 score = -float('inf') # Penalize if Pacman is in the same position as before
             else:
                 score = self.alpha_beta(new_game, self.depth-1, alpha, beta, False)
-
-            print(move, score)
-
             if score > best_evaluation:
                 best_evaluation = score
                 best_move = move
-            
+
             del new_game
         
-        print("Selected:", best_move, "with score", best_evaluation)
+        if best_evaluation == -float('inf'):
+            print(moves, best_move, best_evaluation)
+
         self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
-        if len(self.last_positions) > 10:  #Keep the last 5 positions
+        if len(self.last_positions) > PACMAN_IA_MEMORY:  #Keep the lasts positions
             self.last_positions.pop(0)
 
         return best_move
