@@ -68,13 +68,13 @@ class Game:
 
 
     def update_level(self):
-        if (self.level == 2):
+        if (self.level == 1):
             self.ghosts.append(self.blinky)
-        elif (self.level == 3):
+        elif (self.level == 2):
             self.ghosts.append(self.pinky)
-        elif (self.level == 4):
+        elif (self.level == 3):
             self.ghosts.append(self.inky)
-        elif (self.level == 5):
+        elif (self.level == 4):
             self.ghosts.append(self.clyde)
         self.reset_game()
         self.set_dots()
@@ -332,7 +332,7 @@ class Game:
             elif self.state == PAUSED and event.key == pygame.K_p:
                 self.state = PLAYING
 
-    def update(self):
+    def update(self, update_pacman=True, update_ghosts=True):
         if self.state != PLAYING:
             return
         
@@ -340,22 +340,22 @@ class Game:
             self.ai.update()
             
         # Update Pacman
-        self.pacman.update(self)
+        if update_pacman: self.pacman.update(self)
         
         # Update ghosts
-        if self.movement_count <= GHOST_FIRST_TARGET_MOVEMENT:
-            self.inky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
-            self.pinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
-            self.blinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
-            self.clyde.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
-            if self.movement_count == GHOST_FIRST_TARGET_MOVEMENT:
-                self.add_home_walls()
-
-        else:
-            self.inky.update(self)
-            self.pinky.update(self)
-            self.blinky.update(self)
-            self.clyde.update(self)
+        if update_ghosts:
+            if self.movement_count <= GHOST_FIRST_TARGET_MOVEMENT:
+                self.inky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+                self.pinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+                self.blinky.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+                self.clyde.set_target(GHOST_FIRST_TARGET_TILE[0], GHOST_FIRST_TARGET_TILE[1], update=True, game=self)
+                if self.movement_count == GHOST_FIRST_TARGET_MOVEMENT:
+                    self.add_home_walls()
+            else:
+                self.inky.update(self)
+                self.pinky.update(self)
+                self.blinky.update(self)
+                self.clyde.update(self)
         
         # Check for collisions and dots
         self.check_collisions()

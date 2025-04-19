@@ -1,15 +1,17 @@
-import math
 from utils.constants import *
-from AI.tools import *
+from ai.tools import *
 from game import Game
+from ai.AI import AI
 from sprites.pacman import Pacman
 from sprites.ghost import Ghost
 from sprites.wall import Wall
 from sprites.dot import Dot
 
-class AI:
+# Current score : 1228
+
+class AlphaBeta(AI):
     def __init__(self, game:Game, depth=3):
-        self.game=game
+        super().__init__(game)
         self.depth=depth
         self.pacman = game.pacman
         self.ghosts = game.ghosts
@@ -18,20 +20,6 @@ class AI:
         self.last_positions = []
         self.back_countdown = PACMAN_IA_BACKCOUNTDOWN
 
-    def distance(self, x1, x2, y1, y2, type = 'manhattan', coef=1):
-        if type == 'manhattan':
-            return abs(x1 - x2) + abs(y1 - y2)
-        elif type == 'euclidean':
-            return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
-        elif type == 'exponential':
-            return math.pow(coef * (abs(x1 - x2) + abs(y1 - y2)), 2)
-        elif type == 'custom':
-            dist = self.distance(x1, x2, y1, y2, type='exponential', coef=coef)
-            for x in range(x1, x2, TILE_SIZE):
-                for y in range(y1, y2, TILE_SIZE):
-                    if not self.game.get_access(x, y):
-                        return 2 * dist
-            return dist
 
     def evaluate(self, game:Game):
         """Evaluates the current state of the game"""
@@ -72,25 +60,37 @@ class AI:
         if depth==0 or game.lives<=0 or not game.dots:
             return self.evaluate(game)
         
-        max_val = -float('inf')
         moves = get_possible_directions(game)
-        for move in moves:
-            # Simulate Pacman's movement
 
-            newgame = game.clone()       
-            newgame.pacman.set_direction(move)
-            newgame.update()
+        if is_pacman_turn:
+            max_val = -float('inf')
+            for move in moves:
+                newgame = game.clone()
+                newgame.update(update_ghosts=False)
+                newgame.pacman.set_direction(move)
+                val = self.alpha_beta(newgame, depth-1, alpha, beta, False)
+                max_val = max(max_val, val)
+                alpha = max(alpha, max_val)
+                if beta <= alpha:
+                    break     
+                del newgame
+            return max_val
+        else:
+            min_val = float('inf')
+            for move in moves:
+                newgame = game.clone()
+                newgame.update(update_pacman=False)
+                newgame.pacman.set_direction(move)
+                val = self.alpha_beta(newgame, depth-1, alpha, beta, True)
+                min_val = min(min_val, val)
+                beta = min(beta, min_val)
+                if beta <= alpha:
+                    break
+                del newgame
+            return min_val
 
-            val = self.alpha_beta(newgame, depth-1, alpha, beta, False)
 
-            max_val = max(max_val, val)
-            alpha = max(alpha, max_val)
-            if beta <= alpha:
-                break
-        
-            del newgame
 
-        return max_val
 
     
     def get_best_direction(self):
@@ -111,13 +111,13 @@ class AI:
             # Simulate Pacman's movement
             new_game = self.game.clone()
             new_game.pacman.set_direction(move)
-            new_game.update()
+            new_game.update(update_ghosts=False)
 
             current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
             if current_pos in self.last_positions:             
                 score = -float('inf') # Penalize if Pacman is in the same position as before
             else:
-                score = self.alpha_beta(new_game, self.depth-1, alpha, beta, False)
+                score = self.alpha_beta(new_game, self.depth-1, alpha, beta, True)
             if score > best_evaluation:
                 best_evaluation = score
                 best_move = move
