@@ -12,7 +12,8 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    #game.ai = LookAhead(game, depth=PACMAN_IA_LOOKAHEAD)
+    
+    game.ai = AlphaBeta(game, depth=4)
     
     play = True
     while play:

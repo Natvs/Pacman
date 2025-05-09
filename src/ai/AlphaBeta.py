@@ -6,6 +6,9 @@ from sprites.pacman import Pacman
 from sprites.ghost import Ghost
 from sprites.wall import Wall
 from sprites.dot import Dot
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor  # Utiliser ThreadPoolExecutor au lieu de ProcessPoolExecutor
+
 
 # Current score : 1228
 
@@ -25,9 +28,15 @@ class AlphaBeta(AI):
         """Evaluates the current state of the game"""
         # This function evaluates the current state of the game based on Pacman's position, ghost positions, and dot positions.
 
-        evaluation=0
-        evaluation+=game.score # Pacman's score is a positive factor
+        evaluation = 0
+        evaluation += game.score # Pacman's score is a positive factor
 
+        # Count nearby ghosts and track their distances
+        nearby_ghosts = 0
+        close_ghosts_penalty = 0
+
+        possible_moves = get_possible_directions(game)
+        
         for ghost in game.ghosts:
             ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='custom', coef=0.1)
 
@@ -35,21 +44,36 @@ class AlphaBeta(AI):
             # If the ghost is normal, we want to get away from it
             if ghost.state == 'frightened':
                 evaluation += (100 / max(1, ghost_distance))
-                pass
             elif ghost.state == 'normal':
+                if ghost_distance < 4*TILE_SIZE:
+                    nearby_ghosts += 1
+                    
                 if ghost_distance < 2*TILE_SIZE:
-                    evaluation -= 100 / ghost_distance  # If Pacman is too close to a ghost, it's game over
+                    evaluation -= 150 / ghost_distance  # Increased penalty for very close ghosts
+                    close_ghosts_penalty += 50  # Add penalty for each close ghost
                 else:
-                    evaluation -= 1 / ghost_distance
-                pass
+                    evaluation -= 2 / ghost_distance  # Slightly increased penalty for all ghosts
+
+        # Add extra penalty when multiple ghosts are nearby (dangerous situation)
+        if nearby_ghosts > 1:
+            # Higher penalty when few escape routes
+            if len(possible_moves) <= 2:
+                evaluation -= 200 * (nearby_ghosts - 1)  # Very dangerous situation
+            else:
+                evaluation -= 100 * (nearby_ghosts - 1)
+        
+        # Apply accumulated penalty for close ghosts
+        evaluation -= close_ghosts_penalty
+
+        # General penalty for being in an area with few escape routes
+        if len(possible_moves) == 1:
+            evaluation -= 50  # Dead end penalty
+        elif len(possible_moves) == 2:
+            evaluation -= 20  # Corridor penalty
 
         for dot in game.dots:
             dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
             evaluation += 1 / (len(game.dots) * dot_distance)  # Closer to the dot is better
-
-        '''wall_count = count_adjacent_walls(game.pacman, game.walls)
-        if wall_count >= 2:
-            evaluation -= 100*wall_count  # Penalize if Pacman is surrounded by walls'''
 
         return evaluation
     
@@ -88,17 +112,26 @@ class AlphaBeta(AI):
                     break
                 del newgame
             return min_val
-
-
-
-
+        
+    def evaluate_move(self, move):
+        """Évalue un mouvement pour la parallélisation"""
+        new_game = self.game.clone()
+        new_game.pacman.set_direction(move)
+        new_game.update(update_ghosts=False)
+        
+        current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
+        if current_pos in self.last_positions:
+            score = -float('inf')  # Penalize if Pacman is in the same position as before
+        else:
+            score = self.alpha_beta(new_game, self.depth-1, -float('inf'), float('inf'), True)
+        
+        del new_game
+        return (move, score)
     
     def get_best_direction(self):
-        """Get the best direction for Pacman to move using Alpha-Beta pruning"""
+        """Get the best direction for Pacman to move using Alpha-Beta pruning with threading"""
         best_move = self.pacman.direction
         best_evaluation = -float('inf')
-        alpha = -float('inf')
-        beta = float('inf')
 
         for ghost in self.ghosts:
             ghost_distance = self.distance(self.pacman.rect.x, ghost.rect.x, self.pacman.rect.y, ghost.rect.y, type='manhattan')
@@ -107,30 +140,27 @@ class AlphaBeta(AI):
                 break
 
         moves = get_possible_directions(self.game)
-        for move in moves:
-            # Simulate Pacman's movement
-            new_game = self.game.clone()
-            new_game.pacman.set_direction(move)
-            new_game.update(update_ghosts=False)
-
-            current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
-            if current_pos in self.last_positions:             
-                score = -float('inf') # Penalize if Pacman is in the same position as before
-            else:
-                score = self.alpha_beta(new_game, self.depth-1, alpha, beta, True)
-            if score > best_evaluation:
-                best_evaluation = score
-                best_move = move
-
-            del new_game
+        
+        # Use ThreadPoolExecutor to evaluate moves in parallel
+        # Note: max_workers should be set according to the number of available CPU cores
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_to_move = {executor.submit(self.evaluate_move, move): move for move in moves}
+            
+            # Wait for all futures to complete and get the results
+            for future in concurrent.futures.as_completed(future_to_move):
+                move_result = future.result()
+                move, score = move_result
+                if score > best_evaluation:
+                    best_evaluation = score
+                    best_move = move
 
         if (PACMAN_IA_MEMORY > 0):
             self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
-            if len(self.last_positions) > PACMAN_IA_MEMORY:  #Keep the lasts positions
+            if len(self.last_positions) > PACMAN_IA_MEMORY:
                 self.last_positions.pop(0)
 
         return best_move
-
+    
     def update(self):
         """Update the AI's decision-making process"""
         best_direction = self.get_best_direction()
