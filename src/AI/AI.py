@@ -94,6 +94,8 @@ class AI:
                     beta = min(beta, min_val)
                     if beta <= alpha:
                         break
+
+                
             return min_val
 
     
