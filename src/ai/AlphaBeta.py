@@ -76,6 +76,8 @@ class AlphaBeta(AI):
             evaluation += 1 / (len(game.dots) * dot_distance)  # Closer to the dot is better
 
         return evaluation
+
+
     
     def alpha_beta(self, game:Game, depth, alpha, beta, is_pacman_turn):
         """Perform the Alpha-Beta pruning algorithm to find the best move"""
