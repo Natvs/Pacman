@@ -30,10 +30,12 @@ class AI:
     def evaluate(self, game:Game):
         """Evaluates the current state of the game"""
         # This function evaluates the current state of the game based on Pacman's position, ghost positions, and dot positions.
+
         if game.lives < self.game.lives:
             return float('-inf')
+    
         evaluation = 0
-        evaluation += game.score # Pacman's score is a positive factor
+        evaluation +=(len(self.game.dots) - len(game.dots))*10
 
         # Count nearby ghosts and track their distances
         nearby_ghosts = 0
@@ -43,8 +45,8 @@ class AI:
         
         for ghost in game.ghosts:
             if game.pacman.rect.colliderect(ghost.rect) and ghost.state == 'normal':
-                return float('-inf')  # Extremely negative score for colliding with a ghost
-            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='custom', coef=0.1)
+                return float('-inf')
+            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='euclidean', coef=0.1)
 
             # If the ghost is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
@@ -53,8 +55,11 @@ class AI:
             elif ghost.state == 'normal':
                 if ghost_distance < 4*TILE_SIZE:
                     nearby_ghosts += 1
-                    
-                if ghost_distance < 2*TILE_SIZE:
+                if ghost_distance < 4*TILE_SIZE:
+                    evaluation -= 50 / ghost_distance
+                elif ghost_distance < 3*TILE_SIZE:
+                    evaluation -= 100 / ghost_distance  
+                elif ghost_distance < 2*TILE_SIZE:
                     evaluation -= 150 / ghost_distance  # Increased penalty for very close ghosts
                     close_ghosts_penalty += 50  # Add penalty for each close ghost
                 else:
@@ -76,8 +81,10 @@ class AI:
             evaluation -= 50  # Dead end penalty
         elif len(possible_moves) == 2:
             evaluation -= 20  # Corridor penalty
-            
+
         for dot in game.dots:
+            if game.pacman.rect.colliderect(dot.rect):
+                evaluation+= 500
             dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
             evaluation += 1 / (len(game.dots) * dot_distance)  # Closer to the dot is better
 
