@@ -6,6 +6,7 @@ from sprites.pacman import Pacman
 from sprites.ghost import Ghost
 from sprites.wall import Wall
 from sprites.dot import Dot
+import os
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor  # Utiliser ThreadPoolExecutor au lieu de ProcessPoolExecutor
 
@@ -27,7 +28,8 @@ class AlphaBeta(AI):
     def evaluate(self, game:Game):
         """Evaluates the current state of the game"""
         # This function evaluates the current state of the game based on Pacman's position, ghost positions, and dot positions.
-
+        if game.lives < self.game.lives:
+            return float('-inf')
         evaluation = 0
         evaluation += game.score # Pacman's score is a positive factor
 
@@ -38,6 +40,8 @@ class AlphaBeta(AI):
         possible_moves = get_possible_directions(game)
         
         for ghost in game.ghosts:
+            if game.pacman.rect.colliderect(ghost.rect) and ghost.state == 'normal':
+                return float('-inf')  # Extremely negative score for colliding with a ghost
             ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='custom', coef=0.1)
 
             # If the ghost is frightened, we want to get closer to it
@@ -70,7 +74,7 @@ class AlphaBeta(AI):
             evaluation -= 50  # Dead end penalty
         elif len(possible_moves) == 2:
             evaluation -= 20  # Corridor penalty
-
+            
         for dot in game.dots:
             dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
             evaluation += 1 / (len(game.dots) * dot_distance)  # Closer to the dot is better
@@ -144,8 +148,8 @@ class AlphaBeta(AI):
         moves = get_possible_directions(self.game)
         
         # Use ThreadPoolExecutor to evaluate moves in parallel
-        # Note: max_workers should be set according to the number of available CPU cores
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        max_workers = os.cpu_count()
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_move = {executor.submit(self.evaluate_move, move): move for move in moves}
             
             # Wait for all futures to complete and get the results

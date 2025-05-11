@@ -50,7 +50,7 @@ class Game:
         new_game.score = self.score
         new_game.movement_count = self.movement_count
         new_game.lives = self.lives
-        new_game.dots = self.dots
+        new_game.dots = self.dots.copy()
         new_game.pacman = self.pacman.clone()
 
         new_game.blinky = self.blinky.clone()
@@ -61,9 +61,7 @@ class Game:
         #new_game.home_walls = [wall for wall in self.home_walls]
         #new_game.walls = [wall for wall in self.walls]
         new_game.access = self.access
-        new_game.dots = [dot for dot in self.dots]
         new_game.ghosts = [ghost.clone() for ghost in self.ghosts]
-        new_game.map_surface = self.map_surface.copy()
         return new_game
 
 

@@ -13,7 +13,7 @@ def main():
     
     game = Game(screen)
     
-    game.ai = AlphaBeta(game, depth=4)
+    game.ai = LookAhead(game, depth=5)
     
     play = True
     while play:
