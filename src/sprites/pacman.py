@@ -2,7 +2,7 @@ import pygame
 from utils.constants import *
 
 class Pacman(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, sprites=None):
         super().__init__()
         self.load_sprites()
         self.image = self.sprites[LEFT][0]  # Default sprite
@@ -44,22 +44,24 @@ class Pacman(pygame.sprite.Sprite):
                 pygame.transform.rotate(base_frame, 300)
             ]
         }
-        
-    def update(self, walls):
+
+    def update(self, game):
+        # Try to change to next_direction if we're not already moving in that direction
+        if self.next_direction != self.direction and self.can_move(self.next_direction, game):
+            self.direction = self.next_direction
+
         # Update position based on direction if we can move
-        if self.can_move(self.direction, walls):
+        if self.can_move(self.direction, game):
             self.rect.x += self.direction[0] * self.speed
             self.rect.y += self.direction[1] * self.speed
-        if self.rect.y >= 17*TILE_SIZE and self.rect.y <= 18*TILE_SIZE:
-            if self.rect.x < 0:
-                self.rect.x = GRID_WIDTH*TILE_SIZE
-            elif self.rect.x > GRID_WIDTH*TILE_SIZE:
-                self.rect.x = 0
-        
-        # Try to change to next_direction if we're not already moving in that direction
-        if self.next_direction != self.direction and self.can_move(self.next_direction, walls):
-            self.direction = self.next_direction
-        
+
+            # When pacman is on a tile to teleport
+            if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
+                if self.rect.x <= PACMAN_SPEED:
+                    self.rect.x = (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED
+                elif self.rect.x >= (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED:
+                    self.rect.x = PACMAN_SPEED
+         
         # Handle animation
         self.animation_timer += 1
         if self.animation_timer >= 6:  # Control animation speed
@@ -69,15 +71,23 @@ class Pacman(pygame.sprite.Sprite):
     
     def set_direction(self, direction):
         self.next_direction = direction
-        
-    def can_move(self, direction, walls):
+
+    def can_move(self, direction, game):
         # Create a temporary rect for checking the next position
         next_rect = self.rect.copy()
         next_rect.x += direction[0] * self.speed
         next_rect.y += direction[1] * self.speed
         
         # Check collision with walls
-        for wall in walls:
-            if next_rect.colliderect(wall.rect):
-                return False
+        if not game.get_access(next_rect.x, next_rect.y):
+            return False
         return True
+    
+    def clone(self):
+        new_pacman = Pacman(self.rect.x, self.rect.y, self.sprites)
+        new_pacman.direction = self.direction
+        new_pacman.next_direction = self.next_direction
+        new_pacman.animation_frame = self.animation_frame
+        new_pacman.animation_timer = self.animation_timer
+        new_pacman.speed = self.speed
+        return new_pacman

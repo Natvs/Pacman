@@ -2,7 +2,8 @@ import pygame
 import sys
 from utils.constants import *
 from game import Game
-from AI.AI import AI
+from ai.LookAhead import LookAhead
+from ai.AlphaBeta import AlphaBeta
 
 def main():
     pygame.init()
@@ -11,7 +12,8 @@ def main():
     clock = pygame.time.Clock()
     
     game = Game(screen)
-    game.ai = AI(game, depth=3)  # Initialize AI with a depth of 5
+    
+    game.ai = LookAhead(game, depth=5)
     
     play = True
     while play:
