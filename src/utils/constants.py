@@ -21,7 +21,11 @@ GHOST_FIRST_TARGET_MOVEMENT = 100
 GHOST_FIRST_TARGET_TILE = (14, 10)
 TELEPORT_POS_Y = 16
 
+
+
 # Look-ahead
+PACMAN_IA_ITERATIONS = 10000
+PACMAN_IA_DEPTH = 7
 PACMAN_IA_MEMORY = 5
 PACMAN_IA_LOOKAHEAD = 4
 PACMAN_IA_BACKCOUNTDOWN = 3
@@ -39,9 +43,6 @@ PLAYING = 'playing'
 PAUSED = 'paused'
 GAME_OVER = 'game_over'
 GAME_WON = "game_won"
-
-# Training settings
-TRAINING_ITERATIONS = 1000
 
 # Sprite paths
 PACMAN_SPRITE = 'resources/images/pacman.png'

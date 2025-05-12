@@ -5,21 +5,67 @@ from game import Game
 from ai.LookAhead import LookAhead
 from ai.AlphaBeta import AlphaBeta
 
-def train_ai(game):
-    print("Training AI...")
+# Store the last training session's actions
+last_training_actions = None
+
+def train_ai(game, screen):
+    font = pygame.font.Font(None, 36)
     actions = []  # List to store AI actions
-    for i in range(TRAINING_ITERATIONS):
+    
+    def display_progress(current, total):
+        screen.fill(BLACK)
+        # Display title
+        title_text = font.render("Training AI...", True, WHITE)
+        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50))
+        screen.blit(title_text, title_rect)
+        
+        # Display progress count
+        count_text = font.render(f"Progress: {current}/{total}", True, WHITE)
+        count_rect = count_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        screen.blit(count_text, count_rect)
+        
+        # Display progress bar
+        progress = current / total
+        bar_width = 400
+        bar_height = 20
+        
+        # Draw progress
+        progress_width = int(bar_width * progress)
+        progress_rect = pygame.Rect((WINDOW_WIDTH - bar_width) // 2,
+                                  WINDOW_HEIGHT // 2 + 30,
+                                  progress_width,
+                                  bar_height)
+        pygame.draw.rect(screen, WHITE, progress_rect)
+        
+        pygame.display.flip()
+    
+    # Initial progress display
+    display_progress(0, PACMAN_IA_ITERATIONS)
+    
+    for i in range(PACMAN_IA_ITERATIONS):
+        # Handle Pygame events to keep the window responsive
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
         game.update()
         actions.append(game.pacman.direction)  # Record the AI's chosen direction
-        if game.state == GAME_WON or game.state == GAME_OVER:
+        if game.state == GAME_WON:
             game.reset()
-        if i % 10 == 0:  # Show progress every 10 iterations
-            print(f"Training progress: {i}/{TRAINING_ITERATIONS}")
-    print("Training complete!")
+        if game.state == GAME_OVER:
+            break
+        
+        # Update progress display more frequently
+        if i % 5 == 0:  # Update every 5 iterations instead of 10
+            display_progress(i, PACMAN_IA_ITERATIONS)
+            pygame.time.wait(1)  # Small delay to ensure display updates
+    
+    # Show completion
+    display_progress(PACMAN_IA_ITERATIONS, PACMAN_IA_ITERATIONS)
     return actions
 
 def replay_actions(game, actions, clock):
-    print("Replaying AI actions...")
     for action in actions:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -31,29 +77,125 @@ def replay_actions(game, actions, clock):
         game.draw()
         pygame.display.flip()
         clock.tick(FPS)  # Slower speed for visualization
+    
+    # Wait a moment after replay
+    pygame.time.wait(1000)
+
+def play_game(screen, clock, ai_mode=False):
+    # Initialize game
+    game = Game(screen)
+    game.state = PLAYING
+    
+    if ai_mode:
+        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
+    
+    # Main game loop
+    while game.state != GAME_OVER and game.state != GAME_WON:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if not ai_mode:  # Only handle player input in player mode
+                game.handle_input(event)
+        
+        game.update()
+        game.draw()
+        pygame.display.flip()
+        clock.tick(FPS)
+    
+    # Display final score
+    final_score = game.score
+    font = pygame.font.Font(None, 36)
+    if game.state == GAME_WON:
+        result_text = f"YOU WON! Score: {final_score}"
+    else:
+        result_text = f"GAME OVER. Final Score: {final_score}"
+    
+    text = font.render(result_text, True, WHITE)
+    text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50))
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    
+    # Wait for a moment before exiting
+    pygame.time.wait(3000)
 
 def main():
     pygame.init()
     
-    # Initialize game without display for training
-    training_game = Game(None)  # Pass None as screen to skip rendering
-    training_game.state = TRAINING
-    training_game.ai = AlphaBeta(training_game, depth=7)
-    
-    # Train the AI and get actions
-    actions = train_ai(training_game)
-    
-    # Initialize display for replay
+    # Initialize display
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Pacman - AI Training Replay")
+    pygame.display.set_caption("Pacman")
     clock = pygame.time.Clock()
     
-    # Create new game instance for replay
-    game = Game(screen)
-    game.state = PLAYING
+    # Selection screen
+    font = pygame.font.Font(None, 36)
+    title = font.render("Select Mode:", True, WHITE)
+    player_text = font.render("Press P for Player Mode", True, WHITE)
+    train_text = font.render("Press T for AI Training Mode", True, WHITE)
+    replay_text = font.render("Press R for AI Replay Mode", True, WHITE)
     
-    # Replay the training actions
-    replay_actions(game, actions, clock)
+    title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 75))
+    player_rect = player_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 25))
+    train_rect = train_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 25))
+    replay_rect = replay_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 75))
+    
+    # Mode selection loop
+    waiting_for_input = True
+    while waiting_for_input:
+        screen.fill(BLACK)
+        screen.blit(title, title_rect)
+        screen.blit(player_text, player_rect)
+        screen.blit(train_text, train_rect)
+        screen.blit(replay_text, replay_rect)
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:  # Player mode
+                    play_game(screen, clock, ai_mode=False)
+                    waiting_for_input = False
+                elif event.key == pygame.K_t:  # AI Training mode
+                    global last_training_actions
+                    # Train AI and save actions
+                    training_game = Game(None)  # No display during game updates
+                    training_game.state = TRAINING
+                    training_game.ai = AlphaBeta(training_game, depth=PACMAN_IA_DEPTH)
+                    last_training_actions = train_ai(training_game, screen)  # But pass screen for progress display
+                    
+                    # Show training completion message
+                    completion_text = font.render("Training Complete!", True, WHITE)
+                    completion_rect = completion_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                    screen.fill(BLACK)
+                    screen.blit(completion_text, completion_rect)
+                    pygame.display.flip()
+                    pygame.time.wait(2000)  # Show message for 2 seconds
+                    
+                elif event.key == pygame.K_r:  # AI Replay mode
+                    if last_training_actions is None:
+                        # Show message that training is needed first
+                        msg_text = font.render("Please run Training Mode first!", True, WHITE)
+                        msg_rect = msg_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                        screen.fill(BLACK)
+                        screen.blit(msg_text, msg_rect)
+                        pygame.display.flip()
+                        pygame.time.wait(2000)  # Show message for 2 seconds
+                    else:
+                        # Create new game for replay
+                        game = Game(screen)
+                        game.state = PLAYING
+                        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
+                        
+                        # Replay the stored actions
+                        replay_actions(game, last_training_actions, clock)
+                    
+                    # Clear screen and continue waiting for input
+                    screen.fill(BLACK)
+                    pygame.display.flip()
+        
+        clock.tick(FPS)
 
 if __name__ == "__main__":
     main()
