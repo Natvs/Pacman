@@ -7,13 +7,17 @@ from ai.AlphaBeta import AlphaBeta
 
 def train_ai(game):
     print("Training AI...")
+    actions = []  # List to store AI actions
     for i in range(TRAINING_ITERATIONS):
         game.update()
+        actions.append(game.pacman.direction)  # Record the AI's chosen direction
         if game.state == GAME_WON or game.state == GAME_OVER:
             game.reset()
         if i % 10 == 0:  # Show progress every 10 iterations
             print(f"Training progress: {i}/{TRAINING_ITERATIONS}")
     print("Training complete!")
+    print("\nAI Actions during training:")
+    print(actions)  # Display the list of actions taken
 
 def main():
     pygame.init()
