@@ -34,10 +34,14 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 # Game states
+TRAINING = 'training'
 PLAYING = 'playing'
 PAUSED = 'paused'
 GAME_OVER = 'game_over'
 GAME_WON = "game_won"
+
+# Training settings
+TRAINING_ITERATIONS = 1000
 
 # Sprite paths
 PACMAN_SPRITE = 'resources/images/pacman.png'

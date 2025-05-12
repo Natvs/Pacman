@@ -24,12 +24,13 @@ class Game:
             self.access = []
             self.dots = []
             
-            # Initialize game map
-            self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-            self.load_map()
+            # Initialize game map only if we have a screen
+            if screen is not None:
+                self.map_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+                self.load_map()
             
             # Create Pacman
-            self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE, None)
+            self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE, None if screen is None else screen)
             
             # Create ghosts
             self.blinky = Blinky(12* TILE_SIZE, 16.5 * TILE_SIZE)
@@ -79,9 +80,10 @@ class Game:
         self.set_dots()
     
     def load_map(self):
-        # Load and scale the map image
-        map_image = pygame.image.load(MAP_SPRITE).convert()
-        self.map_surface = pygame.transform.scale(map_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        # Only load map image if we're not in training mode
+        if self.screen is not None:
+            map_image = pygame.image.load(MAP_SPRITE).convert()
+            self.map_surface = pygame.transform.scale(map_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
    
     def set_access(self):
         self.access = []
@@ -332,7 +334,7 @@ class Game:
                 self.state = PLAYING
 
     def update(self, update_pacman=True, update_ghosts=True):
-        if self.state != PLAYING:
+        if self.state != PLAYING and self.state != TRAINING:
             return
         
         if hasattr(self, 'ai'):
@@ -405,17 +407,12 @@ class Game:
         self.movement_count = 0
     
     def draw(self):
+        if self.screen is None or self.state == TRAINING:
+            return
+            
         # Draw map
         self.screen.blit(self.map_surface, (0, 0))
         
-        # Draw walls
-        '''tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
-        for wall in self.walls:
-            pygame.draw.rect(tmp, BLUE, wall.rect)
-        walls_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
-        pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), walls_surface)
-        self.screen.blit(walls_surface, (0, 0))'''
-
         # Draw dots
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
         for dot in self.dots:
@@ -440,14 +437,12 @@ class Game:
         self.screen.blit(score_text, (10, 10))
         self.screen.blit(lives_text, (10, 40))
         
+        # Draw game state messages
         if self.state == GAME_OVER:
-            print("game over")
             game_over_text = font.render('GAME OVER', True, RED)
             text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(game_over_text, text_rect)
         elif self.state == GAME_WON:
-            print("game won")
             game_won_text = font.render('GAME WON', True, GREEN)
             text_rect = game_won_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(game_won_text, text_rect)
-
