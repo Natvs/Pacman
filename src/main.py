@@ -11,8 +11,10 @@ def train_ai(game):
     for i in range(TRAINING_ITERATIONS):
         game.update()
         actions.append(game.pacman.direction)  # Record the AI's chosen direction
-        if game.state == GAME_WON or game.state == GAME_OVER:
+        if game.state == GAME_WON:
             game.reset()
+        if game.state == GAME_OVER:
+            break
         if i % 10 == 0:  # Show progress every 10 iterations
             print(f"Training progress: {i}/{TRAINING_ITERATIONS}")
     print("Training complete!")
@@ -38,7 +40,7 @@ def main():
     # Initialize game without display for training
     training_game = Game(None)  # Pass None as screen to skip rendering
     training_game.state = TRAINING
-    training_game.ai = AlphaBeta(training_game, depth=7)
+    training_game.ai = AlphaBeta(training_game, depth=PACMAN_IA_DEPTH)
     
     # Train the AI and get actions
     actions = train_ai(training_game)
