@@ -35,7 +35,7 @@ class AI:
             return float('-inf')
     
         evaluation = 0
-        evaluation +=(len(self.game.dots) - len(game.dots))*100
+        evaluation +=(len(self.game.dots) - len(game.dots))*100 #evaluation based on the number of dots eaten
 
         # Count nearby ghosts and track their distances
         nearby_ghosts = 0
@@ -46,7 +46,7 @@ class AI:
         for ghost in game.ghosts:
             if game.pacman.rect.colliderect(ghost.rect) and ghost.state == 'normal':
                 return float('-inf')
-            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='euclidean', coef=0.1)
+            ghost_distance = self.distance(game.pacman.rect.x, ghost.rect.x, game.pacman.rect.y, ghost.rect.y, type='manhattan', coef=0.1)
 
             # If the ghost is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
@@ -59,10 +59,13 @@ class AI:
                     evaluation -= 40/ghost_distance
                 elif ghost_distance <5*TILE_SIZE:
                     evaluation -= 60/ghost_distance
+                    close_ghosts_penalty += 20
                 elif ghost_distance < 4*TILE_SIZE:
                     evaluation -= 120 / ghost_distance
+                    close_ghosts_penalty += 50
                 elif ghost_distance < 3*TILE_SIZE:
-                    evaluation -= 200 / ghost_distance  
+                    evaluation -= 200 / ghost_distance
+                    close_ghosts_penalty += 100  
                 elif ghost_distance < 2*TILE_SIZE:
                     evaluation -= 350 / ghost_distance  # Increased penalty for very close ghosts
                     close_ghosts_penalty += 200  # Add penalty for each close ghost
@@ -73,9 +76,9 @@ class AI:
         if nearby_ghosts > 1:
             # Higher penalty when few escape routes
             if len(possible_moves)==1:
-                evaluation -= 600 * (nearby_ghosts - 1)
+                evaluation -= 800 * (nearby_ghosts - 1)
             elif len(possible_moves) == 2:
-                evaluation -= 400 * (nearby_ghosts - 1)  # Very dangerous situation
+                evaluation -= 550 * (nearby_ghosts - 1)  # Very dangerous situation
             else:
                 evaluation -= 250 * (nearby_ghosts - 1)
         
