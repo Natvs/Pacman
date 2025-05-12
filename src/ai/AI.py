@@ -35,7 +35,7 @@ class AI:
             return float('-inf')
     
         evaluation = 0
-        evaluation +=(len(self.game.dots) - len(game.dots))*10
+        evaluation +=(len(self.game.dots) - len(game.dots))*100
 
         # Count nearby ghosts and track their distances
         nearby_ghosts = 0
@@ -51,39 +51,44 @@ class AI:
             # If the ghost is frightened, we want to get closer to it
             # If the ghost is normal, we want to get away from it
             if ghost.state == 'frightened':
-                evaluation += (100 / max(1, ghost_distance))
+                evaluation += (150 / max(1, ghost_distance))
             elif ghost.state == 'normal':
-                if ghost_distance < 4*TILE_SIZE:
+                if ghost_distance < 6*TILE_SIZE:
                     nearby_ghosts += 1
-                if ghost_distance < 4*TILE_SIZE:
-                    evaluation -= 50 / ghost_distance
+                if ghost_distance < 6*TILE_SIZE:
+                    evaluation -= 40/ghost_distance
+                elif ghost_distance <5*TILE_SIZE:
+                    evaluation -= 60/ghost_distance
+                elif ghost_distance < 4*TILE_SIZE:
+                    evaluation -= 120 / ghost_distance
                 elif ghost_distance < 3*TILE_SIZE:
-                    evaluation -= 100 / ghost_distance  
+                    evaluation -= 200 / ghost_distance  
                 elif ghost_distance < 2*TILE_SIZE:
-                    evaluation -= 150 / ghost_distance  # Increased penalty for very close ghosts
-                    close_ghosts_penalty += 50  # Add penalty for each close ghost
+                    evaluation -= 350 / ghost_distance  # Increased penalty for very close ghosts
+                    close_ghosts_penalty += 200  # Add penalty for each close ghost
                 else:
-                    evaluation -= 2 / ghost_distance  # Slightly increased penalty for all ghosts
+                    evaluation -= 3 / ghost_distance  # Slightly increased penalty for all ghosts
 
         # Add extra penalty when multiple ghosts are nearby (dangerous situation)
         if nearby_ghosts > 1:
             # Higher penalty when few escape routes
-            if len(possible_moves) <= 2:
-                evaluation -= 200 * (nearby_ghosts - 1)  # Very dangerous situation
+            if len(possible_moves)==1:
+                evaluation -= 600 * (nearby_ghosts - 1)
+            elif len(possible_moves) == 2:
+                evaluation -= 400 * (nearby_ghosts - 1)  # Very dangerous situation
             else:
-                evaluation -= 100 * (nearby_ghosts - 1)
+                evaluation -= 250 * (nearby_ghosts - 1)
         
         # Apply accumulated penalty for close ghosts
         evaluation -= close_ghosts_penalty
 
         # General penalty for being in an area with few escape routes
         if len(possible_moves) == 1:
-            evaluation -= 50  # Dead end penalty
+            evaluation -= 450  # Dead end penalty
         elif len(possible_moves) == 2:
-            evaluation -= 20  # Corridor penalty
+            evaluation -= 180  # Corridor penalty
 
         for dot in game.dots:
             dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
-            evaluation += 4 / (len(game.dots) * dot_distance)  # Closer to the dot is better
-
+            evaluation += 45 / (len(game.dots) * dot_distance)  # Closer to the dot is better
         return evaluation
