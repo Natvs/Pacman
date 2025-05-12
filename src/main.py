@@ -13,7 +13,7 @@ def main():
     
     game = Game(screen)
     
-    game.ai = AlphaBeta(game, depth=5)
+    game.ai = AlphaBeta(game, depth=7)
     
     play = True
     while play:

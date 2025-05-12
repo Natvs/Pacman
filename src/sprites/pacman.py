@@ -51,9 +51,10 @@ class Pacman(pygame.sprite.Sprite):
             self.direction = self.next_direction
 
         # Update position based on direction if we can move
-        if self.can_move(self.direction, game):
-            self.rect.x += self.direction[0] * self.speed
-            self.rect.y += self.direction[1] * self.speed
+        move = self.can_move(self.direction, game)
+        if move > 0:
+            self.rect.x += self.direction[0] * move
+            self.rect.y += self.direction[1] * move
 
             # When pacman is on a tile to teleport
             if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
@@ -73,15 +74,11 @@ class Pacman(pygame.sprite.Sprite):
         self.next_direction = direction
 
     def can_move(self, direction, game):
-        # Create a temporary rect for checking the next position
-        next_rect = self.rect.copy()
-        next_rect.x += direction[0] * self.speed
-        next_rect.y += direction[1] * self.speed
-        
-        # Check collision with walls
-        if not game.get_access(next_rect.x, next_rect.y):
-            return False
-        return True
+        """Check if pacman can move in the given direction"""
+        for i in range(self.speed, 0, -1):
+            if game.get_access(self.rect.x + i*direction[0], self.rect.y + i*direction[1]):
+                return i
+        return 0
     
     def clone(self):
         new_pacman = Pacman(self.rect.x, self.rect.y, self.sprites)

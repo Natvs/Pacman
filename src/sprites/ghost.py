@@ -77,9 +77,10 @@ class Ghost(pygame.sprite.Sprite):
             
         # Update position
 
-        if self.can_move(self.direction, game):
-            self.rect.x += self.direction[0] * self.speed
-            self.rect.y += self.direction[1] * self.speed
+        move = self.can_move(self.direction, game)
+        if move > 0:
+            self.rect.x += self.direction[0] * move
+            self.rect.y += self.direction[1] * move
 
             # When the ghost is on a tile to teleport
             if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
@@ -91,13 +92,10 @@ class Ghost(pygame.sprite.Sprite):
     def can_move(self, direction, game):
         """Check if the ghost can move in the given direction"""
 
-        next_rect = self.rect.copy()
-        next_rect.x += direction[0] * self.speed
-        next_rect.y += direction[1] * self.speed
-
-        if not game.get_access(next_rect.x, next_rect.y):
-            return False
-        return True
+        for i in range(self.speed, 0, -1):
+            if game.get_access(self.rect.x + i*direction[0], self.rect.y + i*direction[1]):
+                return i
+        return 0
         
     def set_frightened(self):
         """Set ghost to frightened state"""
