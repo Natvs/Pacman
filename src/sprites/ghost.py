@@ -17,8 +17,12 @@ class Ghost(pygame.sprite.Sprite):
         self.target_tile = None
 
     def load_sprites(self):
-        sprite_sheet = pygame.image.load(self.sprite_path).convert_alpha()
-        self.image = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
+        try:
+            sprite_sheet = pygame.image.load(self.sprite_path).convert_alpha()
+            self.image = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
+        except pygame.error:
+            # Create a dummy surface for training mode
+            self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         
     def get_tile_pos(self):
         """Convert pixel position to tile position"""

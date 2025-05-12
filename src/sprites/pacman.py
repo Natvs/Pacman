@@ -16,34 +16,43 @@ class Pacman(pygame.sprite.Sprite):
         self.speed = PACMAN_SPEED
         
     def load_sprites(self):
-        sprite_sheet = pygame.image.load(PACMAN_SPRITE).convert_alpha()
-        
-        # Create base frame
-        base_frame = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
-        
-        # Create animation frames (open and closed mouth)
-        self.sprites = {
-            LEFT: [
-                base_frame,
-                pygame.transform.rotate(base_frame, 30),
-                pygame.transform.rotate(base_frame, -30)
-            ],
-            RIGHT: [
-                pygame.transform.rotate(base_frame, 180),
-                pygame.transform.rotate(base_frame, 150),
-                pygame.transform.rotate(base_frame, 210)
-            ],
-            UP: [
-                pygame.transform.rotate(base_frame, 90),
-                pygame.transform.rotate(base_frame, 60),
-                pygame.transform.rotate(base_frame, 120)
-            ],
-            DOWN: [
-                pygame.transform.rotate(base_frame, 270),
-                pygame.transform.rotate(base_frame, 240),
-                pygame.transform.rotate(base_frame, 300)
-            ]
-        }
+        try:
+            sprite_sheet = pygame.image.load(PACMAN_SPRITE).convert_alpha()
+            # Create base frame
+            base_frame = pygame.transform.scale(sprite_sheet, (TILE_SIZE, TILE_SIZE))
+            
+            # Create animation frames (open and closed mouth)
+            self.sprites = {
+                LEFT: [
+                    base_frame,
+                    pygame.transform.rotate(base_frame, 30),
+                    pygame.transform.rotate(base_frame, -30)
+                ],
+                RIGHT: [
+                    pygame.transform.rotate(base_frame, 180),
+                    pygame.transform.rotate(base_frame, 150),
+                    pygame.transform.rotate(base_frame, 210)
+                ],
+                UP: [
+                    pygame.transform.rotate(base_frame, 90),
+                    pygame.transform.rotate(base_frame, 60),
+                    pygame.transform.rotate(base_frame, 120)
+                ],
+                DOWN: [
+                    pygame.transform.rotate(base_frame, 270),
+                    pygame.transform.rotate(base_frame, 240),
+                    pygame.transform.rotate(base_frame, 300)
+                ]
+            }
+        except pygame.error:
+            # Create a dummy surface for training mode
+            dummy_surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            self.sprites = {
+                LEFT: [dummy_surface] * 3,
+                RIGHT: [dummy_surface] * 3,
+                UP: [dummy_surface] * 3,
+                DOWN: [dummy_surface] * 3
+            }
 
     def update(self, game):
         # Try to change to next_direction if we're not already moving in that direction
