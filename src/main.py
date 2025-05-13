@@ -85,9 +85,9 @@ def train_ai(game, screen):
             'movement_count': game.movement_count
         })
         if game.state == GAME_WON:
-            game.reset()
+            print("Congratulation! Game Won!")
+            break
         if game.state == GAME_OVER:
-            print("Game Over during training.")
             print("Game Over during training.")
             break
         

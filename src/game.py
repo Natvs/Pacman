@@ -381,7 +381,7 @@ class Game:
         if len(self.dots) == 0:
             self.level += 1
             self.update_level()
-        if self.level == 30:
+        if self.level == 5:
             self.state = GAME_WON
 
         # Check dots collisions
