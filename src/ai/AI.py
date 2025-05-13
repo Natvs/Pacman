@@ -55,21 +55,21 @@ class AI:
             elif ghost.state == 'normal':
                 if ghost_distance < 6*TILE_SIZE:
                     nearby_ghosts += 1
-                if ghost_distance < 6*TILE_SIZE:
-                    evaluation -= 50/ghost_distance
-                    close_ghosts_penalty += 25
-                elif ghost_distance <5*TILE_SIZE:
-                    evaluation -= 80/ghost_distance
-                    close_ghosts_penalty += 50
+                if ghost_distance < 2*TILE_SIZE:
+                    evaluation -= 400/ghost_distance
+                    close_ghosts_penalty += 250
+                elif ghost_distance <3*TILE_SIZE:
+                    evaluation -= 250/ghost_distance
+                    close_ghosts_penalty += 150
                 elif ghost_distance < 4*TILE_SIZE:
                     evaluation -= 150 / ghost_distance
                     close_ghosts_penalty += 80
-                elif ghost_distance < 3*TILE_SIZE:
-                    evaluation -= 250 / ghost_distance
-                    close_ghosts_penalty += 150  
-                elif ghost_distance < 2*TILE_SIZE:
-                    evaluation -= 400 / ghost_distance  # Increased penalty for very close ghosts
-                    close_ghosts_penalty += 250  # Add penalty for each close ghost
+                elif ghost_distance < 5*TILE_SIZE:
+                    evaluation -= 80 / ghost_distance
+                    close_ghosts_penalty += 5 
+                elif ghost_distance < 6*TILE_SIZE:
+                    evaluation -= 50 / ghost_distance  # Increased penalty for very close ghosts
+                    close_ghosts_penalty += 25  # Add penalty for each close ghost
                 else:
                     evaluation -= 3 / ghost_distance  # Slightly increased penalty for all ghosts
 
@@ -92,7 +92,11 @@ class AI:
         elif len(possible_moves) == 2:
             evaluation -= 180  # Corridor penalty
 
+        #min_distance = float('inf')
         for dot in game.dots:
             dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='manhattan', coef=2)
+            #if dot_distance < min_distance:
+                #min_distance = dot_distance
             evaluation += 45 / (len(game.dots) * dot_distance)  # Closer to the dot is better
+        #evaluation += 20 / min_distance  # Closer to the closest dot is better
         return evaluation

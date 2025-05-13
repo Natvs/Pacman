@@ -114,11 +114,11 @@ def replay_actions(game:Game, actions, clock):
         
         # Position in top-right corner with padding
         padding = 10
-        text_rect.topright = (WINDOW_WIDTH - padding, padding)
+        text_rect.topright = (WINDOW_WIDTH - padding, WINDOW_HEIGHT - padding - 10)
         
         # Draw background rectangle
         bg_rect = text_rect.inflate(20, 10)  # Make background slightly larger
-        bg_rect.topright = (WINDOW_WIDTH - padding + 10, padding - 5)
+        bg_rect.topright = (WINDOW_WIDTH - padding + 10, WINDOW_HEIGHT - padding - 5)
         pygame.draw.rect(game.screen, BLACK, bg_rect)
         
         # Draw text
