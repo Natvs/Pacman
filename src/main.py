@@ -46,27 +46,56 @@ def train_ai(game, screen):
         # Handle Pygame events to keep the window responsive
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                print("Training interrupted.")
                 pygame.quit()
                 sys.exit()
         
+        start_life = game.lives
+        start_level = game.level
         game.update()
-        actions.append(game.pacman.direction)  # Record the AI's chosen direction
+        if game.lives < start_life:
+            print("Pacman lost a life during training.", game.lives, "lives left")
+        if game.level < start_level:
+            print("Level up to level", game.level)
+        actions.append((game.pacman.direction[0], game.pacman.direction[1]))  # Record the AI's chosen direction
         if game.state == GAME_WON:
             game.reset()
         if game.state == GAME_OVER:
+            print("Game Over during training.")
             break
         
         # Update progress display more frequently
-        if i % 5 == 0:  # Update every 5 iterations instead of 10
+        if i % 10 == 0:
             display_progress(i, PACMAN_IA_ITERATIONS)
-            pygame.time.wait(1)  # Small delay to ensure display updates
+            #pygame.time.wait(1)  # Small delay to ensure display updates
     
     # Show completion
     display_progress(PACMAN_IA_ITERATIONS, PACMAN_IA_ITERATIONS)
     return actions
 
 def replay_actions(game, actions, clock):
-    for action in actions:
+    total_actions = len(actions)
+    font = pygame.font.Font(None, 24)
+    
+    def display_iteration(current):
+        # Create background rectangle
+        text = f"Action: {current}/{total_actions}"
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        
+        # Position in top-right corner with padding
+        padding = 10
+        text_rect.topright = (WINDOW_WIDTH - padding, padding)
+        
+        # Draw background rectangle
+        bg_rect = text_rect.inflate(20, 10)  # Make background slightly larger
+        bg_rect.topright = (WINDOW_WIDTH - padding + 10, padding - 5)
+        pygame.draw.rect(game.screen, BLACK, bg_rect)
+        
+        # Draw text
+        game.screen.blit(text_surface, text_rect)
+    
+    for i, action in enumerate(actions, 1):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -75,8 +104,9 @@ def replay_actions(game, actions, clock):
         game.pacman.set_direction(action)
         game.update()
         game.draw()
+        display_iteration(i)  # Display current iteration
         pygame.display.flip()
-        clock.tick(FPS)  # Slower speed for visualization
+        clock.tick(FPS)
     
     # Wait a moment after replay
     pygame.time.wait(1000)
@@ -85,9 +115,6 @@ def play_game(screen, clock, ai_mode=False):
     # Initialize game
     game = Game(screen)
     game.state = PLAYING
-    
-    if ai_mode:
-        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
     
     # Main game loop
     while game.state != GAME_OVER and game.state != GAME_WON:
@@ -162,7 +189,7 @@ def main():
                     # Train AI and save actions
                     training_game = Game(None)  # No display during game updates
                     training_game.state = TRAINING
-                    training_game.ai = AlphaBeta(training_game, depth=PACMAN_IA_DEPTH)
+                    training_game.ai = LookAhead(training_game, depth=PACMAN_IA_DEPTH)
                     last_training_actions = train_ai(training_game, screen)  # But pass screen for progress display
                     
                     # Show training completion message
@@ -186,7 +213,7 @@ def main():
                         # Create new game for replay
                         game = Game(screen)
                         game.state = PLAYING
-                        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
+                        # game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
                         
                         # Replay the stored actions
                         replay_actions(game, last_training_actions, clock)

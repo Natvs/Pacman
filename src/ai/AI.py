@@ -35,7 +35,7 @@ class AI:
             return float('-inf')
     
         evaluation = 0
-        evaluation +=(len(self.game.dots) - len(game.dots))*100 #evaluation based on the number of dots eaten
+        evaluation += (len(self.game.dots) - len(game.dots))*100 #evaluation based on the number of dots eaten
 
         # Count nearby ghosts and track their distances
         nearby_ghosts = 0
@@ -53,6 +53,7 @@ class AI:
             if ghost.state == 'frightened':
                 evaluation += (150 / max(1, ghost_distance))
             elif ghost.state == 'normal':
+                
                 if ghost_distance < 6*TILE_SIZE:
                     nearby_ghosts += 1
                 if ghost_distance < 6*TILE_SIZE:
