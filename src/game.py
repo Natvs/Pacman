@@ -67,13 +67,13 @@ class Game:
 
 
     def update_level(self):
-        if (self.level == 1):
+        if self.level == 1:
             self.ghosts.append(self.blinky)
-        elif (self.level == 2):
+        elif self.level == 2:
             self.ghosts.append(self.pinky)
-        elif (self.level == 3):
+        elif self.level == 3:
             self.ghosts.append(self.inky)
-        elif (self.level == 4):
+        elif self.level == 4:
             self.ghosts.append(self.clyde)
         self.reset_game()
         self.set_dots()
@@ -90,9 +90,9 @@ class Game:
             self.access.append([True for _ in range(0, GRID_HEIGHT*TILE_SIZE + 2*TILE_SIZE)])
         
         for wall in self.walls:
-            for x in range(0, TILE_SIZE):
-                for y in range(0, TILE_SIZE):
-                    self.access[wall.rect.x+x+TILE_SIZE][wall.rect.y+y+TILE_SIZE] = False
+            for x in range(wall.rect.x, wall.rect.x + wall.rect.width):
+                for y in range(wall.rect.y, wall.rect.y + wall.rect.height):
+                    self.access[TILE_SIZE + x][TILE_SIZE + y] = False
     
     def get_access(self, x, y):
         if (x > GRID_WIDTH*TILE_SIZE or y > GRID_HEIGHT*TILE_SIZE or x < 0 or y < 0):
@@ -308,14 +308,7 @@ class Game:
                 if self.get_access(x*TILE_SIZE, y*TILE_SIZE):
                     if not ((x >= 11 and x <= 16) and (y >= 14 and y <= 17)):
                         self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
-                    
-    def is_wall(self, x, y):
-        for wall in self.walls:
-            if (wall.rect.x == x and wall.rect.y == y):
-                return True
-        return False
-            
-
+                
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
             if self.state == PLAYING:
@@ -419,6 +412,25 @@ class Game:
         dot_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), dot_surface)
         self.screen.blit(dot_surface, (0, 0))
+
+        # Draw walls
+        #tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        #for wall in self.walls:
+        #    tmp.blit(wall.image, wall.rect)
+        #wall_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        #pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), wall_surface)
+        #self.screen.blit(wall_surface, (0, 0))
+
+        # Draw access
+        #tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
+        #for x in range(GRID_WIDTH*TILE_SIZE):
+        #    for y in range(GRID_HEIGHT*TILE_SIZE):
+        #        if self.get_access(x, y):
+        #            #print("draw access", x, y)
+        #            pygame.draw.rect(tmp, WHITE, (x, y, 1, 1))
+        #access_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        #pygame.transform.scale(tmp, (WINDOW_WIDTH, WINDOW_HEIGHT), access_surface)
+        #self.screen.blit(access_surface, (0, 0))
 
         # Draw all sprites
         tmp = pygame.Surface((GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE), pygame.SRCALPHA)
