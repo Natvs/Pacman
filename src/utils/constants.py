@@ -14,7 +14,7 @@ RED = (255, 0, 0)
 GREEN = (0, 150, 0)
 
 # Game settings
-FPS = 60
+FPS = 30
 PACMAN_SPEED = 3
 GHOST_SPEED = 2
 GHOST_FIRST_TARGET_MOVEMENT = 100
@@ -47,6 +47,9 @@ PLAYING = 'playing'
 PAUSED = 'paused'
 GAME_OVER = 'game_over'
 GAME_WON = "game_won"
+
+# Ghost settings
+FRIGHTENED_DURATION = 400  # Number of frames (about 6-7 seconds at 60 FPS)
 
 # Sprite paths
 PACMAN_SPRITE = 'resources/images/pacman.png'

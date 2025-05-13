@@ -15,6 +15,7 @@ class Ghost(pygame.sprite.Sprite):
         self.speed = GHOST_SPEED
         self.state = 'normal'  # normal, frightened, eaten
         self.target_tile = None
+        self.frightened_timer = 0
 
     def load_sprites(self):
         try:
@@ -76,6 +77,13 @@ class Ghost(pygame.sprite.Sprite):
         self._update(game)
     
     def _update(self, game):
+        # Handle frightened timer
+        if self.state == 'frightened':
+            if self.frightened_timer > 0:
+                self.frightened_timer -= 1
+            if self.frightened_timer <= 0:
+                self.set_normal()
+            
         if self.state == 'normal':
             self.direction = self.get_next_direction(game)
             
@@ -103,7 +111,8 @@ class Ghost(pygame.sprite.Sprite):
     def set_frightened(self):
         """Set ghost to frightened state"""
         self.state = 'frightened'
-        self.speed = GHOST_SPEED * 0.5
+        self.speed = GHOST_SPEED // 2
+        self.frightened_timer = FRIGHTENED_DURATION
         
     def set_normal(self):
         """Return ghost to normal state"""

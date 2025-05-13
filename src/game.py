@@ -1,4 +1,5 @@
 import pygame
+import random
 from utils.constants import *
 from sprites.wall import Wall
 from sprites.dot import Dot
@@ -307,7 +308,8 @@ class Game:
             for y in range(0, GRID_HEIGHT):
                 if self.get_access(x*TILE_SIZE, y*TILE_SIZE):
                     if not ((x >= 11 and x <= 16) and (y >= 14 and y <= 17)):
-                        self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
+                        pellet = random.randint(0, 100)
+                        self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE, is_power_pellet=(pellet == 100)))
                 
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
@@ -381,6 +383,9 @@ class Game:
         for dot in self.dots:
             if self.pacman.rect.colliderect(dot.rect):
                 self.score += 1
+                if dot.is_power_pellet:
+                    for ghost in self.ghosts:
+                        ghost.set_frightened()
                 self.dots.remove(dot)
     
     def reset_game(self):
