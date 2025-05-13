@@ -131,7 +131,12 @@ def replay_actions(game:Game, actions, clock):
         # Synchronize game state
         game.score = action['score']
         game.lives = action['lives']
-        game.level = action['level']
+        
+        # Update level (this will properly initialize ghosts)
+        if game.level != action['level']:
+            game.level = action['level']
+            game.update_level()
+            
         game.movement_count = action['movement_count']
         
         # Synchronize Pacman
@@ -140,9 +145,17 @@ def replay_actions(game:Game, actions, clock):
         game.pacman.rect.y = pacman_state['position'][1]
         game.pacman.set_direction(pacman_state['direction'])
         
-        # Synchronize ghosts
-        for ghost, ghost_state in zip(game.ghosts, action['ghosts']):
-            if not ghost in game.ghosts: game.ghosts.append(ghost)
+        # Map ghost states to the correct ghost instances
+        ghost_mapping = {
+            0: game.blinky,
+            1: game.pinky,
+            2: game.inky,
+            3: game.clyde
+        }
+        
+        # Synchronize active ghosts
+        for idx, ghost_state in enumerate(action['ghosts']):
+            ghost = ghost_mapping[idx]
             ghost.rect.x = ghost_state['position'][0]
             ghost.rect.y = ghost_state['position'][1]
             ghost.direction = ghost_state['direction']

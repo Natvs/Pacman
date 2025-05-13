@@ -1,9 +1,9 @@
 # Windo dimensions (28x36 tiles of 8x8 pixels)
-TILE_SIZE = 8
+TILE_SIZE = 6
 GRID_WIDTH = 28
 GRID_HEIGHT = 36
-WINDOW_WIDTH = GRID_WIDTH * TILE_SIZE * 2
-WINDOW_HEIGHT = GRID_HEIGHT * TILE_SIZE * 2
+WINDOW_WIDTH = GRID_WIDTH * TILE_SIZE * 2.5
+WINDOW_HEIGHT = GRID_HEIGHT * TILE_SIZE * 2.5
 
 # Colors
 BLACK = (0, 0, 0)
@@ -23,10 +23,10 @@ TELEPORT_POS_Y = 16
 
 
 # IA
-PACMAN_IA_ITERATIONS = 5000
-PACMAN_IA_DEPTH = 5
-PACMAN_IA_MEMORY = 5
-PACMAN_IA_AVOID_AREA = 3 * TILE_SIZE
+PACMAN_IA_ITERATIONS = 3000
+PACMAN_IA_DEPTH = 4  # Reduced depth for faster decisions
+PACMAN_IA_MEMORY = 0  # Disabled position memory to allow backtracking
+PACMAN_IA_AVOID_AREA = 2 * TILE_SIZE  # Reduced ghost avoidance area
 
 # Direction vectors
 UP = (0, -1)

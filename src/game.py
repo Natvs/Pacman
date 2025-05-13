@@ -32,13 +32,14 @@ class Game:
             # Create Pacman
             self.pacman = Pacman(13.5 * TILE_SIZE, 20*TILE_SIZE, None if screen is None else screen)
             
-            # Create ghosts
+            # Create and initialize ghosts
+            self.ghosts = []
             self.blinky = Blinky(12* TILE_SIZE, 16.5 * TILE_SIZE)
             self.pinky = Pinky(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
             self.inky = Inky(15 * TILE_SIZE, 16.5 * TILE_SIZE)
             self.clyde = Clyde(13.5 * TILE_SIZE, 16.5 * TILE_SIZE)
-            self.ghosts = []
-
+            
+            # Initialize the game
             self.set_walls()
             self.set_access()
             self.reset_game()
@@ -67,14 +68,19 @@ class Game:
 
 
     def update_level(self):
-        if self.level == 2:
+        # Reset ghosts list
+        self.ghosts = []
+        
+        # Add ghosts based on level
+        if self.level >= 2:
             self.ghosts.append(self.blinky)
-        elif self.level == 3:
+        if self.level >= 3:
             self.ghosts.append(self.pinky)
-        elif self.level == 4:
+        if self.level >= 4:
             self.ghosts.append(self.inky)
-        elif self.level == 5:
+        if self.level >= 5:
             self.ghosts.append(self.clyde)
+            
         self.reset_game()
         self.set_dots()
     

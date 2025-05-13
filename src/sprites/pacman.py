@@ -56,19 +56,29 @@ class Pacman(pygame.sprite.Sprite):
 
     def update(self, game):
         move = 0
+        # Try to turn first, with more lenient position checks
         if (self.next_direction != self.direction):
-            for i in range(self.speed, -1, -1):
-                move = self.can_move(self.next_direction, game, relative_pos=(i*self.direction[0], i*self.direction[1]))
-                if move > 0:
-                    self.rect.x += i*self.direction[0] + move*self.next_direction[0]
-                    self.rect.y += i*self.direction[1] + move*self.next_direction[1]
-                    self.direction = self.next_direction
-                    break        
-            move = self.can_move(self.direction, game)
+            # Check turn at current position first
+            move = self.can_move(self.next_direction, game)
             if move > 0:
-                self.rect.x += self.direction[0] * move
-                self.rect.y += self.direction[1] * move
-        else:
+                self.rect.x += move * self.next_direction[0]
+                self.rect.y += move * self.next_direction[1]
+                self.direction = self.next_direction
+            else:
+                # If can't turn immediately, check at intervals while moving forward
+                for i in range(self.speed, -1, -1):
+                    move = self.can_move(self.next_direction, game, relative_pos=(i*self.direction[0], i*self.direction[1]))
+                    if move > 0:
+                        self.rect.x += i*self.direction[0] + move*self.next_direction[0]
+                        self.rect.y += i*self.direction[1] + move*self.next_direction[1]
+                        self.direction = self.next_direction
+                        break        
+                if move == 0:  # If couldn't turn, try moving forward
+                    move = self.can_move(self.direction, game)
+                    if move > 0:
+                        self.rect.x += self.direction[0] * move
+                        self.rect.y += self.direction[1] * move
+        else:  # Continue in current direction
             move = self.can_move(self.direction, game)
             if move > 0:
                 self.rect.x += self.direction[0] * move
