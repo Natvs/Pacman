@@ -186,7 +186,6 @@ def main():
                         # Create new game for replay
                         game = Game(screen)
                         game.state = PLAYING
-                        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
                         
                         # Replay the stored actions
                         replay_actions(game, last_training_actions, clock)
