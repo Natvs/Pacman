@@ -86,16 +86,15 @@ class Ghost(pygame.sprite.Sprite):
             self.rect.x += self.direction[0] * move
             self.rect.y += self.direction[1] * move
 
-            # When the ghost is on a tile to teleport
-            if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
-                if self.rect.x <= GHOST_SPEED:
-                    self.rect.x = (GRID_WIDTH*TILE_SIZE)-GHOST_SPEED
-                elif self.rect.x >= (GRID_WIDTH*TILE_SIZE)-GHOST_SPEED:
-                    self.rect.x = GHOST_SPEED
-            
+        # When thge ghost is on a tile to teleport
+        if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
+            if self.rect.x <= PACMAN_SPEED:
+                self.rect.x = (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED
+            elif self.rect.x >= (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED:
+                self.rect.x = PACMAN_SPEED
+
     def can_move(self, direction, game):
         """Check if the ghost can move in the given direction"""
-
         for i in range(self.speed, 0, -1):
             if game.get_access(self.rect.x + i*direction[0], self.rect.y + i*direction[1]):
                 return i
