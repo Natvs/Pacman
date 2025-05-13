@@ -2,6 +2,7 @@ import pygame
 import sys
 from utils.constants import *
 from game import Game
+from sprites.dot import Dot
 from ai.LookAhead import LookAhead
 from ai.AlphaBeta import AlphaBeta
 
@@ -46,37 +47,137 @@ def train_ai(game, screen):
         # Handle Pygame events to keep the window responsive
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                print("Training interrupted.")
                 pygame.quit()
                 sys.exit()
         
+        start_life = game.lives
+        start_level = game.level
+        start_life = game.lives
+        start_level = game.level
         game.update()
-        actions.append(game.pacman.direction)  # Record the AI's chosen direction
+        if game.lives < start_life:
+            print("Pacman lost a life during training.", game.lives, "lives left")
+        if start_level < game.level:
+            print("Level up to level", game.level)
+            
+        # Record complete game state
+        ghost_states = [{
+            'direction': (ghost.direction[0], ghost.direction[1]),
+            'position': (ghost.rect.x, ghost.rect.y),
+            'state': ghost.state,
+            'target': ghost.target if hasattr(ghost, 'target') else None
+        } for ghost in game.ghosts]
+
+        # Create a snapshot of dot positions
+        dot_positions = [(dot.rect.x, dot.rect.y) for dot in game.dots]
+        
+        actions.append({
+            'pacman': {
+                'direction': (game.pacman.direction[0], game.pacman.direction[1]),
+                'position': (game.pacman.rect.x, game.pacman.rect.y),
+            },
+            'ghosts': ghost_states,
+            'dots': dot_positions,
+            'score': game.score,
+            'lives': game.lives,
+            'level': game.level,
+            'movement_count': game.movement_count
+        })
         if game.state == GAME_WON:
             game.reset()
         if game.state == GAME_OVER:
+            print("Game Over during training.")
+            print("Game Over during training.")
             break
         
         # Update progress display more frequently
-        if i % 5 == 0:  # Update every 5 iterations instead of 10
+        if i % 50 == 0:
             display_progress(i, PACMAN_IA_ITERATIONS)
-            pygame.time.wait(1)  # Small delay to ensure display updates
+            #pygame.time.wait(1)  # Small delay to ensure display updates
+            #pygame.time.wait(1)  # Small delay to ensure display updates
     
     # Show completion
     display_progress(PACMAN_IA_ITERATIONS, PACMAN_IA_ITERATIONS)
     return actions
 
-def replay_actions(game, actions, clock):
-    for action in actions:
+def replay_actions(game:Game, actions, clock):
+    game.state = PLAYING
+    total_actions = len(actions)
+    font = pygame.font.Font(None, 24)
+    
+    def display_iteration(current):
+        # Create background rectangle
+        text = f"Action: {current}/{total_actions}"
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        
+        # Position in top-right corner with padding
+        padding = 10
+        text_rect.topright = (WINDOW_WIDTH - padding, padding)
+        
+        # Draw background rectangle
+        bg_rect = text_rect.inflate(20, 10)  # Make background slightly larger
+        bg_rect.topright = (WINDOW_WIDTH - padding + 10, padding - 5)
+        pygame.draw.rect(game.screen, BLACK, bg_rect)
+        
+        # Draw text
+        game.screen.blit(text_surface, text_rect)
+    
+    for i in range(len(actions)):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
         
-        game.pacman.set_direction(action)
-        game.update()
+        action = actions[i]
+        
+        # Synchronize game state
+        game.score = action['score']
+        game.lives = action['lives']
+        
+        # Update level (this will properly initialize ghosts)
+        if game.level != action['level']:
+            game.level = action['level']
+            game.update_level()
+            
+        game.movement_count = action['movement_count']
+        
+        # Synchronize Pacman
+        pacman_state = action['pacman']
+        game.pacman.rect.x = pacman_state['position'][0]
+        game.pacman.rect.y = pacman_state['position'][1]
+        game.pacman.set_direction(pacman_state['direction'])
+        
+        # Map ghost states to the correct ghost instances
+        ghost_mapping = {
+            0: game.blinky,
+            1: game.pinky,
+            2: game.inky,
+            3: game.clyde
+        }
+        
+        # Synchronize active ghosts
+        for idx, ghost_state in enumerate(action['ghosts']):
+            ghost = ghost_mapping[idx]
+            ghost.rect.x = ghost_state['position'][0]
+            ghost.rect.y = ghost_state['position'][1]
+            ghost.direction = ghost_state['direction']
+            ghost.state = ghost_state['state']
+            if ghost_state['target'] is not None:
+                ghost.target = ghost_state['target']
+        
+        # Synchronize dots
+        game.dots = []
+        for x, y in action['dots']:
+            dot = Dot(x, y)
+            game.dots.append(dot)
+        
         game.draw()
+        display_iteration(i)  # Display current iteration
+        display_iteration(i)  # Display current iteration
         pygame.display.flip()
-        clock.tick(FPS)  # Slower speed for visualization
+        clock.tick(FPS)
     
     # Wait a moment after replay
     pygame.time.wait(1000)
@@ -85,9 +186,6 @@ def play_game(screen, clock, ai_mode=False):
     # Initialize game
     game = Game(screen)
     game.state = PLAYING
-    
-    if ai_mode:
-        game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
     
     # Main game loop
     while game.state != GAME_OVER and game.state != GAME_WON:
@@ -171,7 +269,7 @@ def main():
                     screen.fill(BLACK)
                     screen.blit(completion_text, completion_rect)
                     pygame.display.flip()
-                    pygame.time.wait(2000)  # Show message for 2 seconds
+                    pygame.time.wait(1500)  # Show message for 2 seconds
                     
                 elif event.key == pygame.K_r:  # AI Replay mode
                     if last_training_actions is None:
@@ -185,7 +283,6 @@ def main():
                     else:
                         # Create new game for replay
                         game = Game(screen)
-                        game.state = PLAYING
                         
                         # Replay the stored actions
                         replay_actions(game, last_training_actions, clock)

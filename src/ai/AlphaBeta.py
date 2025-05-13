@@ -90,17 +90,24 @@ class AlphaBeta(AI):
         moves = get_possible_directions(self.game)
         
         # Use ThreadPoolExecutor to evaluate moves in parallel
-        max_workers = os.cpu_count()
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_move = {executor.submit(self.evaluate_move, move): move for move in moves}
+        # max_workers = os.cpu_count()
+        # with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        #     future_to_move = {executor.submit(self.evaluate_move, move): move for move in moves}
             
-            # Wait for all futures to complete and get the results
-            for future in concurrent.futures.as_completed(future_to_move):
-                move_result = future.result()
-                move, score = move_result
-                if score > best_evaluation:
-                    best_evaluation = score
-                    best_move = move
+        #     # Wait for all futures to complete and get the results
+        #     for future in concurrent.futures.as_completed(future_to_move):
+        #         move_result = future.result()
+        #         move, score = move_result
+        #         if score > best_evaluation:
+        #             best_evaluation = score
+        #             best_move = move
+
+        for move in moves:
+            move_result = self.evaluate_move(move)
+            move, score = move_result
+            if score > best_evaluation:
+                best_evaluation = score
+                best_move = move
 
         if (PACMAN_IA_MEMORY > 0):
             self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
