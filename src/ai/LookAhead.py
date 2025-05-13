@@ -77,14 +77,21 @@ class LookAhead(AI):
         moves = get_possible_directions(self.game)
         
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.evaluate_move, move, self.game, self.depth): move for move in moves}
-                      
-            for future in concurrent.futures.as_completed(futures):
-                move, score = future.result()
-                if score > best_evaluation:
-                    best_evaluation = score
-                    best_move = move
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+        #     futures = {executor.submit(self.evaluate_move, move, self.game, self.depth): move for move in moves}
+            
+            
+        #     for future in concurrent.futures.as_completed(futures):
+        #         move, score = future.result()
+        #         if score > best_evaluation:
+        #             best_evaluation = score
+        #             best_move = move
+
+        for move in moves:
+            move, score = self.evaluate_move(move, self.game, self.depth)
+            if score > best_evaluation:
+                best_evaluation = score
+                best_move = move
 
         if (PACMAN_IA_MEMORY > 0):
             self.last_positions.append((self.pacman.rect.x, self.pacman.rect.y))
