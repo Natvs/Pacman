@@ -53,6 +53,8 @@ def train_ai(game, screen):
         
         start_life = game.lives
         start_level = game.level
+        start_life = game.lives
+        start_level = game.level
         game.update()
         if game.lives < start_life:
             print("Pacman lost a life during training.", game.lives, "lives left")
@@ -86,11 +88,13 @@ def train_ai(game, screen):
             game.reset()
         if game.state == GAME_OVER:
             print("Game Over during training.")
+            print("Game Over during training.")
             break
         
         # Update progress display more frequently
         if i % 50 == 0:
             display_progress(i, PACMAN_IA_ITERATIONS)
+            #pygame.time.wait(1)  # Small delay to ensure display updates
             #pygame.time.wait(1)  # Small delay to ensure display updates
     
     # Show completion
@@ -170,6 +174,7 @@ def replay_actions(game:Game, actions, clock):
             game.dots.append(dot)
         
         game.draw()
+        display_iteration(i)  # Display current iteration
         display_iteration(i)  # Display current iteration
         pygame.display.flip()
         clock.tick(FPS)

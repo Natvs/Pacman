@@ -55,22 +55,31 @@ class Pacman(pygame.sprite.Sprite):
             }
 
     def update(self, game):
-        # Try to change to next_direction if we're not already moving in that direction
-        if self.next_direction != self.direction and self.can_move(self.next_direction, game):
-            self.direction = self.next_direction
+        move = 0
+        if (self.next_direction != self.direction):
+            for i in range(self.speed, -1, -1):
+                move = self.can_move(self.next_direction, game, relative_pos=(i*self.direction[0], i*self.direction[1]))
+                if move > 0:
+                    self.rect.x += i*self.direction[0] + move*self.next_direction[0]
+                    self.rect.y += i*self.direction[1] + move*self.next_direction[1]
+                    self.direction = self.next_direction
+                    break        
+            move = self.can_move(self.direction, game)
+            if move > 0:
+                self.rect.x += self.direction[0] * move
+                self.rect.y += self.direction[1] * move
+        else:
+            move = self.can_move(self.direction, game)
+            if move > 0:
+                self.rect.x += self.direction[0] * move
+                self.rect.y += self.direction[1] * move
 
-        # Update position based on direction if we can move
-        move = self.can_move(self.direction, game)
-        if move > 0:
-            self.rect.x += self.direction[0] * move
-            self.rect.y += self.direction[1] * move
-
-            # When pacman is on a tile to teleport
-            if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
-                if self.rect.x <= PACMAN_SPEED:
-                    self.rect.x = (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED
-                elif self.rect.x >= (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED:
-                    self.rect.x = PACMAN_SPEED
+        # When pacman is on a tile to teleport
+        if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
+            if self.rect.x <= PACMAN_SPEED:
+                self.rect.x = (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED
+            elif self.rect.x >= (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED:
+                self.rect.x = PACMAN_SPEED
          
         # Handle animation
         self.animation_timer += 1
@@ -82,10 +91,10 @@ class Pacman(pygame.sprite.Sprite):
     def set_direction(self, direction):
         self.next_direction = direction
 
-    def can_move(self, direction, game):
+    def can_move(self, direction, game, relative_pos=(0, 0)):
         """Check if pacman can move in the given direction"""
         for i in range(self.speed, 0, -1):
-            if game.get_access(self.rect.x + i*direction[0], self.rect.y + i*direction[1]):
+            if game.get_access(self.rect.x + relative_pos[0] + i*direction[0], self.rect.y + relative_pos[1] + i*direction[1]):
                 return i
         return 0
     

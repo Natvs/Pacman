@@ -68,10 +68,7 @@ class AlphaBeta(AI):
         new_game.update(update_ghosts=False)
         
         current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
-        if current_pos in self.last_positions:
-            score = -float('inf')  # Penalize if Pacman is in the same position as before
-        else:
-            score = self.alpha_beta(new_game, self.depth-1, -float('inf'), float('inf'), True)
+        score = self.alpha_beta(new_game, self.depth-1, -float('inf'), float('inf'), True)
         
         del new_game
         return (move, score)
