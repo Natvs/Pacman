@@ -78,7 +78,7 @@ class LookAhead(AI):
         
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.evaluate_move, move, self.game, self.depth): move for move in moves}
+            futures = {executor.submit(self.evaluate_move, move, self.game.clone(), self.depth): move for move in moves}
                       
             for future in concurrent.futures.as_completed(futures):
                 move, score = future.result()

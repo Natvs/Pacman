@@ -103,6 +103,6 @@ class AI:
             evaluation -= 180  # Corridor penalty
 
         for dot in game.dots:
-            dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='manhattan', coef=2)
+            dot_distance = self.distance(game.pacman.rect.x, dot.rect.x, game.pacman.rect.y, dot.rect.y, type='euclidean', coef=2)
             evaluation += 30 / (len(game.dots) * dot_distance)  # Closer to the dot is better
         return evaluation
