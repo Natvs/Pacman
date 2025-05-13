@@ -2,6 +2,7 @@ import pygame
 import sys
 from utils.constants import *
 from game import Game
+from sprites.dot import Dot
 from ai.LookAhead import LookAhead
 from ai.AlphaBeta import AlphaBeta
 
@@ -58,11 +59,28 @@ def train_ai(game, screen):
         if start_level < game.level:
             print("Level up to level", game.level)
             
-        # Record Pacman and ghost directions
-        ghost_directions = [(ghost.direction[0], ghost.direction[1]) for ghost in game.ghosts]
+        # Record complete game state
+        ghost_states = [{
+            'direction': (ghost.direction[0], ghost.direction[1]),
+            'position': (ghost.rect.x, ghost.rect.y),
+            'state': ghost.state,
+            'target': ghost.target if hasattr(ghost, 'target') else None
+        } for ghost in game.ghosts]
+
+        # Create a snapshot of dot positions
+        dot_positions = [(dot.rect.x, dot.rect.y) for dot in game.dots]
+        
         actions.append({
-            'pacman': (game.pacman.direction[0], game.pacman.direction[1]),
-            'ghosts': ghost_directions
+            'pacman': {
+                'direction': (game.pacman.direction[0], game.pacman.direction[1]),
+                'position': (game.pacman.rect.x, game.pacman.rect.y),
+            },
+            'ghosts': ghost_states,
+            'dots': dot_positions,
+            'score': game.score,
+            'lives': game.lives,
+            'level': game.level,
+            'movement_count': game.movement_count
         })
         if game.state == GAME_WON:
             game.reset()
@@ -81,10 +99,6 @@ def train_ai(game, screen):
 
 def replay_actions(game:Game, actions, clock):
     game.state = PLAYING
-    game.blinky.state = 'record'
-    game.pinky.state = 'record'
-    game.inky.state = 'record'
-    game.clyde.state = 'record'
     total_actions = len(actions)
     font = pygame.font.Font(None, 24)
     
@@ -112,14 +126,36 @@ def replay_actions(game:Game, actions, clock):
                 pygame.quit()
                 sys.exit()
         
-        # Set Pacman direction
-        game.pacman.set_direction(actions[i]['pacman'])
+        action = actions[i]
         
-        # Set ghost directions
-        for ghost, direction in zip(game.ghosts, actions[i]['ghosts']):
-            ghost.direction = direction
+        # Synchronize game state
+        game.score = action['score']
+        game.lives = action['lives']
+        game.level = action['level']
+        game.movement_count = action['movement_count']
         
-        game.update()
+        # Synchronize Pacman
+        pacman_state = action['pacman']
+        game.pacman.rect.x = pacman_state['position'][0]
+        game.pacman.rect.y = pacman_state['position'][1]
+        game.pacman.set_direction(pacman_state['direction'])
+        
+        # Synchronize ghosts
+        for ghost, ghost_state in zip(game.ghosts, action['ghosts']):
+            if not ghost in game.ghosts: game.ghosts.append(ghost)
+            ghost.rect.x = ghost_state['position'][0]
+            ghost.rect.y = ghost_state['position'][1]
+            ghost.direction = ghost_state['direction']
+            ghost.state = ghost_state['state']
+            if ghost_state['target'] is not None:
+                ghost.target = ghost_state['target']
+        
+        # Synchronize dots
+        game.dots = []
+        for x, y in action['dots']:
+            dot = Dot(x, y)
+            game.dots.append(dot)
+        
         game.draw()
         display_iteration(i)  # Display current iteration
         pygame.display.flip()

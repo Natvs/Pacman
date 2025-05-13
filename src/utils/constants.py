@@ -23,9 +23,9 @@ TELEPORT_POS_Y = 16
 
 
 # IA
-PACMAN_IA_ITERATIONS = 3000
-PACMAN_IA_DEPTH = 6  # Increased depth for better lookahead
-PACMAN_IA_MEMORY = 1  # Reduced memory to be less restrictive on movement
+PACMAN_IA_ITERATIONS = 5000
+PACMAN_IA_DEPTH = 5
+PACMAN_IA_MEMORY = 5
 PACMAN_IA_AVOID_AREA = 3 * TILE_SIZE
 
 # Direction vectors
