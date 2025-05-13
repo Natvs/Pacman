@@ -67,13 +67,13 @@ class Game:
 
 
     def update_level(self):
-        if self.level == 1:
+        if self.level == 2:
             self.ghosts.append(self.blinky)
-        elif self.level == 2:
-            self.ghosts.append(self.pinky)
         elif self.level == 3:
-            self.ghosts.append(self.inky)
+            self.ghosts.append(self.pinky)
         elif self.level == 4:
+            self.ghosts.append(self.inky)
+        elif self.level == 5:
             self.ghosts.append(self.clyde)
         self.reset_game()
         self.set_dots()

@@ -55,9 +55,15 @@ def train_ai(game, screen):
         game.update()
         if game.lives < start_life:
             print("Pacman lost a life during training.", game.lives, "lives left")
-        if game.level < start_level:
+        if start_level < game.level:
             print("Level up to level", game.level)
-        actions.append((game.pacman.direction[0], game.pacman.direction[1]))  # Record the AI's chosen direction
+            
+        # Record Pacman and ghost directions
+        ghost_directions = [(ghost.direction[0], ghost.direction[1]) for ghost in game.ghosts]
+        actions.append({
+            'pacman': (game.pacman.direction[0], game.pacman.direction[1]),
+            'ghosts': ghost_directions
+        })
         if game.state == GAME_WON:
             game.reset()
         if game.state == GAME_OVER:
@@ -65,7 +71,7 @@ def train_ai(game, screen):
             break
         
         # Update progress display more frequently
-        if i % 10 == 0:
+        if i % 50 == 0:
             display_progress(i, PACMAN_IA_ITERATIONS)
             #pygame.time.wait(1)  # Small delay to ensure display updates
     
@@ -73,7 +79,12 @@ def train_ai(game, screen):
     display_progress(PACMAN_IA_ITERATIONS, PACMAN_IA_ITERATIONS)
     return actions
 
-def replay_actions(game, actions, clock):
+def replay_actions(game:Game, actions, clock):
+    game.state = PLAYING
+    game.blinky.state = 'record'
+    game.pinky.state = 'record'
+    game.inky.state = 'record'
+    game.clyde.state = 'record'
     total_actions = len(actions)
     font = pygame.font.Font(None, 24)
     
@@ -95,13 +106,19 @@ def replay_actions(game, actions, clock):
         # Draw text
         game.screen.blit(text_surface, text_rect)
     
-    for i, action in enumerate(actions, 1):
+    for i in range(len(actions)):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
         
-        game.pacman.set_direction(action)
+        # Set Pacman direction
+        game.pacman.set_direction(actions[i]['pacman'])
+        
+        # Set ghost directions
+        for ghost, direction in zip(game.ghosts, actions[i]['ghosts']):
+            ghost.direction = direction
+        
         game.update()
         game.draw()
         display_iteration(i)  # Display current iteration
@@ -212,8 +229,6 @@ def main():
                     else:
                         # Create new game for replay
                         game = Game(screen)
-                        game.state = PLAYING
-                        # game.ai = AlphaBeta(game, depth=PACMAN_IA_DEPTH)
                         
                         # Replay the stored actions
                         replay_actions(game, last_training_actions, clock)

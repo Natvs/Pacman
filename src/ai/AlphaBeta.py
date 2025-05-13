@@ -22,7 +22,6 @@ class AlphaBeta(AI):
         self.walls = game.walls
         self.dots = game.dots
         self.last_positions = []
-        self.back_countdown = PACMAN_IA_BACKCOUNTDOWN
 
     
     def alpha_beta(self, game:Game, depth, alpha, beta, is_pacman_turn):
@@ -59,6 +58,7 @@ class AlphaBeta(AI):
                 if beta <= alpha:
                     break
                 del newgame
+
             return min_val
         
     def evaluate_move(self, move):
@@ -68,10 +68,11 @@ class AlphaBeta(AI):
         new_game.update(update_ghosts=False)
         
         current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
+        score = self.alpha_beta(new_game, self.depth-1, -float('inf'), float('inf'), True)
+
+        # Apply a smaller penalty for revisiting positions
         if current_pos in self.last_positions:
-            score = -float('inf')  # Penalize if Pacman is in the same position as before
-        else:
-            score = self.alpha_beta(new_game, self.depth-1, -float('inf'), float('inf'), True)
+            score *= 0.5  # Reduce the score by half instead of setting to -inf
         
         del new_game
         return (move, score)
@@ -83,7 +84,7 @@ class AlphaBeta(AI):
 
         for ghost in self.ghosts:
             ghost_distance = self.distance(self.pacman.rect.x, ghost.rect.x, self.pacman.rect.y, ghost.rect.y, type='manhattan')
-            if ghost_distance < 4*TILE_SIZE:
+            if ghost_distance < PACMAN_IA_AVOID_AREA:
                 self.last_positions.clear()  # Clear the last positions if Pacman is too close to a ghost
                 break
 

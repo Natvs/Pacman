@@ -1,4 +1,4 @@
-# Window dimensions (28x36 tiles of 8x8 pixels)
+# Windo dimensions (28x36 tiles of 8x8 pixels)
 TILE_SIZE = 8
 GRID_WIDTH = 28
 GRID_HEIGHT = 36
@@ -14,7 +14,7 @@ RED = (255, 0, 0)
 GREEN = (0, 150, 0)
 
 # Game settings
-FPS = 80
+FPS = 60
 PACMAN_SPEED = 3
 GHOST_SPEED = 2
 GHOST_FIRST_TARGET_MOVEMENT = 100
@@ -22,13 +22,10 @@ GHOST_FIRST_TARGET_TILE = (14, 10)
 TELEPORT_POS_Y = 16
 
 
-
-# Look-ahead
-PACMAN_IA_ITERATIONS = 2000
-PACMAN_IA_DEPTH = 5
-PACMAN_IA_MEMORY = 5
-PACMAN_IA_LOOKAHEAD = 4
-PACMAN_IA_BACKCOUNTDOWN = 3
+# IA
+PACMAN_IA_ITERATIONS = 3000
+PACMAN_IA_DEPTH = 6  # Increased depth for better lookahead
+PACMAN_IA_MEMORY = 1  # Reduced memory to be less restrictive on movement
 PACMAN_IA_AVOID_AREA = 3 * TILE_SIZE
 
 # Direction vectors
@@ -38,11 +35,11 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 # Game states
-TRAINING = 'training'
-PLAYING = 'playing'
-PAUSED = 'paused'
-GAME_OVER = 'game_over'
-GAME_WON = "game_won"
+TRAINING = 0
+PLAYING = 1
+PAUSED = 2
+GAME_OVER = 3
+GAME_WON = 4
 
 # Sprite paths
 PACMAN_SPRITE = 'resources/images/pacman.png'

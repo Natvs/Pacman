@@ -86,7 +86,7 @@ class Ghost(pygame.sprite.Sprite):
             self.rect.x += self.direction[0] * move
             self.rect.y += self.direction[1] * move
 
-        # When thge ghost is on a tile to teleport
+        # When the ghost is on a tile to teleport
         if self.rect.y >= TELEPORT_POS_Y*TILE_SIZE and self.rect.y <= (TELEPORT_POS_Y+1)*TILE_SIZE:
             if self.rect.x <= PACMAN_SPEED:
                 self.rect.x = (GRID_WIDTH*TILE_SIZE)-PACMAN_SPEED

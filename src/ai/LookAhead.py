@@ -55,10 +55,11 @@ class LookAhead(AI):
         new_game.update()
         
         current_pos = (new_game.pacman.rect.x, new_game.pacman.rect.y)
-        if current_pos in self.last_positions:             
-            score = -float('inf')  # Penalize if Pacman is in the same position as before
-        else:
-            score = self.look_ahead(new_game, depth-1)
+        score = self.look_ahead(new_game, depth-1)
+        
+        # Apply a smaller penalty for revisiting positions
+        if current_pos in self.last_positions:
+            score *= 0.5  # Reduce the score by half instead of setting to -inf
             
         del new_game
         return (move, score)
@@ -76,10 +77,8 @@ class LookAhead(AI):
 
         moves = get_possible_directions(self.game)
         
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.evaluate_move, move, self.game, self.depth): move for move in moves}
-                      
+            futures = {executor.submit(self.evaluate_move, move, self.game.clone(), self.depth): move for move in moves}              
             for future in concurrent.futures.as_completed(futures):
                 move, score = future.result()
                 if score > best_evaluation:
