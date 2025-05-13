@@ -67,14 +67,13 @@ class Game:
 
 
     def update_level(self):
-        if (self.level == 1):
+        if (self.level == 2):
             self.ghosts.append(self.blinky)
-            self.ghosts.append(self.pinky)
-        elif (self.level == 2):
-            self.ghosts.append(self.pinky)
         elif (self.level == 3):
-            self.ghosts.append(self.inky)
+            self.ghosts.append(self.pinky)
         elif (self.level == 4):
+            self.ghosts.append(self.inky)
+        elif (self.level == 5):
             self.ghosts.append(self.clyde)
         self.reset_game()
         self.set_dots()
@@ -309,14 +308,7 @@ class Game:
                 if self.get_access(x*TILE_SIZE, y*TILE_SIZE):
                     if not ((x >= 11 and x <= 16) and (y >= 14 and y <= 17)):
                         self.dots.append(Dot(x*TILE_SIZE, y*TILE_SIZE))
-                    
-    def is_wall(self, x, y):
-        for wall in self.walls:
-            if (wall.rect.x == x and wall.rect.y == y):
-                return True
-        return False
             
-
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
             if self.state == PLAYING:
@@ -393,15 +385,15 @@ class Game:
     
     def reset_game(self):
         """Reset positions of Pacman and ghosts after losing a life"""
-        self.pacman.rect.x = 13.5 * TILE_SIZE
-        self.pacman.rect.y = 20 * TILE_SIZE
+        self.pacman.rect.x = PACMAN_DEFAULT_POS[0]
+        self.pacman.rect.y = PACMAN_DEFAULT_POS[1]
         self.pacman.direction = LEFT
         
         # Reset ghost positions
-        self.blinky.rect.x, self.blinky.rect.y = 12 * TILE_SIZE, 17 * TILE_SIZE
-        self.pinky.rect.x, self.pinky.rect.y = 13.5 * TILE_SIZE, 17* TILE_SIZE
-        self.inky.rect.x, self.inky.rect.y = 15 * TILE_SIZE, 17 * TILE_SIZE
-        self.clyde.rect.x, self.clyde.rect.y = 13.5 * TILE_SIZE, 16 * TILE_SIZE
+        self.blinky.rect.x, self.blinky.rect.y = BLINKY_DEFAULT_POS[0], BLINKY_DEFAULT_POS[1]
+        self.pinky.rect.x, self.pinky.rect.y = PINKY_DEFAULT_POS[0], PINKY_DEFAULT_POS[1]
+        self.inky.rect.x, self.inky.rect.y = INKY_DEFAULT_POS[0], INKY_DEFAULT_POS[1]
+        self.clyde.rect.x, self.clyde.rect.y = CLYDE_DEFAULT_POS[1], CLYDE_DEFAULT_POS[1]
 
         self.remove_home_walls()
         self.movement_count = 0
