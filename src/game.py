@@ -430,11 +430,13 @@ class Game:
         self.screen.blit(sprites_surface, (0, 0))
         
         # Draw score and lives
-        font = pygame.font.Font(None, 36)
-        score_text = font.render(f'Score: {self.score}', True, WHITE)
-        lives_text = font.render(f'Lives: {self.lives}', True, WHITE)
-        self.screen.blit(score_text, (10, 10))
-        self.screen.blit(lives_text, (10, 40))
+        font = pygame.font.Font(None, 30)
+        score_text = font.render(f'Score: {self.score}', True, (175, 255, 255))
+        lives_text = font.render(f'Lives: {self.lives}', True, (175, 255, 255))
+        level_text = font.render(f'Level: {self.level}', True, (175, 255, 255))
+        self.screen.blit(level_text, (10, 10))
+        self.screen.blit(lives_text, (110, 10))
+        self.screen.blit(score_text, (210, 10))
         
         # Draw game state messages
         if self.state == GAME_OVER:
